@@ -15,9 +15,11 @@ public static class Chunk
 
     private static Vector3Int GetPostitionFromIndex(ChunkData chunkData, int index)
     {
-        int x = index % chunkData.chunkSize;
-        int y = (index / chunkData.chunkSize) % chunkData.chunkHeight;
-        int z = index / (chunkData.chunkSize * chunkData.chunkHeight);
+        int chunkSize = chunkData.chunkSize;
+        int chunkHeight = chunkData.chunkHeight;
+        int x = index % chunkSize;
+        int y = (index /chunkSize) % chunkHeight;
+        int z = index / (chunkSize * chunkHeight);
         return new Vector3Int(x, y, z);
     }
 

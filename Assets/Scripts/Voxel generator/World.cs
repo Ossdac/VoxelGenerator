@@ -106,9 +106,10 @@ public class World : MonoBehaviour
 
     private void GenerateVoxels(ChunkData data)
     {
-        for (int x = 0; x < data.chunkSize; x++)
+        int chunkSize = data.chunkSize;
+        for (int x = 0; x < chunkSize; x++)
         {
-            for (int z = 0; z < data.chunkSize; z++)
+            for (int z = 0; z < chunkSize; z++)
             {
                 float noiseValue = Mathf.PerlinNoise((data.worldPosition.x + x) * noiseScale, (data.worldPosition.z + z) * noiseScale);
                 int groundPosition = Mathf.RoundToInt(noiseValue * chunkHeight);
@@ -134,11 +135,12 @@ public class World : MonoBehaviour
 
     private void GenerateVoxelsFrom3DBoolArray(ChunkData data, bool[,,] preMadeArray)
     {
-        for (int x = 0; x < data.chunkSize; x++)
+        int chunkSize = data.chunkSize;
+        for (int x = 0; x < chunkSize; x++)
         {
-            for (int y = 0; y < data.chunkHeight; y++)
+            for (int y = 0; y < chunkHeight; y++)
             {
-                for (int z = 0; z < data.chunkSize; z++)
+                for (int z = 0; z < chunkSize; z++)
                 {
                     BlockType voxelType = preMadeArray[x, y, z] ? BlockType.Wall : BlockType.Air;
                     Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
@@ -149,11 +151,12 @@ public class World : MonoBehaviour
 
     private void GenerateVoxelsFrom2DBoolArray(ChunkData data, bool[,] preMadeArray)
     {
-        for (int x = 0; x < data.chunkSize; x++)
+        int chunkSize = data.chunkSize;
+        for (int x = 0; x < chunkSize; x++)
         {
-            for (int y = 0; y < data.chunkHeight; y++)
+            for (int y = 0; y < chunkHeight; y++)
             {
-                for (int z = 0; z < chunkHeight; z++)
+                for (int z = 0; z < chunkSize; z++)
                 {
                     BlockType voxelType = preMadeArray[x, y] ? BlockType.Wall : BlockType.Air;
                     Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);

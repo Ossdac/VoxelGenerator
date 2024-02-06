@@ -76,7 +76,10 @@ public class ChunkRenderer : MonoBehaviour
                 else
                     Gizmos.color = new Color(1, 0, 1, 0.4f);
 
-                Gizmos.DrawCube(transform.position + new Vector3(ChunkData.chunkSize / 2f, ChunkData.chunkHeight / 2f, ChunkData.chunkSize / 2f), new Vector3(ChunkData.chunkSize, ChunkData.chunkHeight, ChunkData.chunkSize));
+                int chunkSize = ChunkData.chunkSize;
+                int chunkHeight = ChunkData.chunkHeight;
+
+                Gizmos.DrawCube(transform.position + new Vector3(chunkSize / 2f, chunkHeight / 2f, chunkSize / 2f), new Vector3(chunkSize, chunkHeight, chunkSize));
             }
         }
     }
