@@ -592,8 +592,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapSizeInChunks: 0
-  chunkSize: 25
-  chunkHeight: 190
+  chunkSize: 10
+  chunkHeight: 100
   noiseScale: 0.03
   chunkPrefab: {fileID: 2543376799029590482, guid: d7a69a4bbab32f848a12842a0a7e247b, type: 3}
   renderDown: 1

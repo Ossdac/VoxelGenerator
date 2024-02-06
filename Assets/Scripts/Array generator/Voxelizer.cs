@@ -57,14 +57,21 @@ public class Voxelizer : MonoBehaviour
 
     void FillVoxelGrid(Bounds bounds)
     {
-        Vector3 voxelSize = new Vector3(bounds.size.x / arrayDimensions.x, bounds.size.y / arrayDimensions.y, bounds.size.z / arrayDimensions.z);
-        for (int x = 0; x < arrayDimensions.x; x++)
+        int arrayDimensionsX = arrayDimensions.x;
+        int arrayDimensionsY = arrayDimensions.y;
+        int arrayDimensionsZ = arrayDimensions.z;
+        float voxelSizeX = bounds.size.x / arrayDimensionsX;
+        float voxelSizeY = bounds.size.y / arrayDimensionsY;
+        float voxelSizeZ = bounds.size.z / arrayDimensionsZ;
+        Vector3 voxelSize = new Vector3(bounds.size.x / arrayDimensionsX, bounds.size.y / arrayDimensionsY, bounds.size.z / arrayDimensionsZ);
+
+        for (int x = 0; x < arrayDimensionsX; x++)
         {
-            for (int y = 0; y < arrayDimensions.y; y++)
+            for (int y = 0; y < arrayDimensionsY; y++)
             {
-                for (int z = 0; z < arrayDimensions.z; z++)
+                for (int z = 0; z < arrayDimensionsZ; z++)
                 {
-                    Vector3 center = bounds.min + new Vector3(voxelSize.x * (x + 0.5f), voxelSize.y * (y + 0.5f), voxelSize.z * (z + 0.5f));
+                    Vector3 center = bounds.min + new Vector3(voxelSizeX * (x + 0.5f), voxelSizeY * (y + 0.5f), voxelSizeZ * (z + 0.5f));
                     bool occupied = Physics.CheckBox(center, voxelSize * 0.5f, Quaternion.identity);
                     voxelGrid[x, y, z] = occupied;
                 }
