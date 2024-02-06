@@ -59,6 +59,8 @@ public class World : MonoBehaviour
         int chunksY = lengthY;
         int chunkCountZ = lengthZ / chunkSize;
 
+        chunkHeight = chunksY;
+
         for (int x = 0; x <= chunkCountX; x++)
         {
             for (int z = 0; z <= chunkCountZ; z++)
