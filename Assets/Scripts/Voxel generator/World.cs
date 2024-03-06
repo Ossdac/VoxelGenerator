@@ -77,10 +77,12 @@ public class World : MonoBehaviour
 
     public void GenerateWorld(bool[,] worldArray)
     {
-        ClearWorld(); 
+        ClearWorld();
 
-        int chunkCountX = worldArray.GetLength(0) / chunkSize;
-        int chunkCountZ = worldArray.GetLength(1) / chunkSize;
+        int lengthX = worldArray.GetLength(0);
+        int lengthZ = worldArray.GetLength(1);
+        int chunkCountX = Mathf.CeilToInt((float)lengthX / chunkSize);
+        int chunkCountZ = Mathf.CeilToInt((float)lengthZ / chunkSize);
 
         for (int x = 0; x < chunkCountX; x++)
         {
@@ -88,7 +90,52 @@ public class World : MonoBehaviour
             {
                 Vector3Int chunkPosition = new Vector3Int(x * chunkSize, 0, z * chunkSize);
                 ChunkData chunkData = new ChunkData(chunkSize, chunkHeight, this, chunkPosition);
-                GenerateVoxelsFrom2DBoolArray(chunkData, worldArray); 
+                bool[,] chunkArray = ExtractChunkArray(worldArray, x, z, chunkSize, lengthX, lengthZ);
+                GenerateVoxelsFrom2DBoolArray(chunkData, chunkArray); 
+                CreateAndRegisterChunk(chunkData);
+            }
+        }
+    }
+
+    public void GenerateWorld(int[,] worldArray)
+    {
+        ClearWorld();
+
+        int lengthX = worldArray.GetLength(0);
+        int lengthZ = worldArray.GetLength(1);
+        int chunkCountX = Mathf.CeilToInt((float)lengthX / chunkSize);
+        int chunkCountZ = Mathf.CeilToInt((float)lengthZ / chunkSize);
+
+        for (int x = 0; x < chunkCountX; x++)
+        {
+            for (int z = 0; z < chunkCountZ; z++)
+            {
+                Vector3Int chunkPosition = new Vector3Int(x * chunkSize, 0, z * chunkSize);
+                ChunkData chunkData = new ChunkData(chunkSize, chunkHeight, this, chunkPosition);
+                int[,] chunkArray = ExtractChunkArray(worldArray, x, z, chunkSize, lengthX, lengthZ);
+                GenerateVoxelsFrom2DIntArray(chunkData, chunkArray);
+                CreateAndRegisterChunk(chunkData);
+            }
+        }
+    }
+
+    public void GenerateWorld(float[,] worldArray)
+    {
+        ClearWorld();
+
+        int lengthX = worldArray.GetLength(0);
+        int lengthZ = worldArray.GetLength(1);
+        int chunkCountX = worldArray.GetLength(0) / chunkSize;
+        int chunkCountZ = worldArray.GetLength(1) / chunkSize;
+
+        for (int x = 0; x <= chunkCountX; x++)
+        {
+            for (int z = 0; z <= chunkCountZ; z++)
+            {
+                Vector3Int chunkPosition = new Vector3Int(x * chunkSize, 0, z * chunkSize);
+                ChunkData chunkData = new ChunkData(chunkSize, chunkHeight, this, chunkPosition);
+                float[,] chunkArray = ExtractChunkArray(worldArray, x, z, chunkSize, lengthX, lengthZ);
+                GenerateVoxelsFrom2DFloatArray(chunkData, chunkArray);
                 CreateAndRegisterChunk(chunkData);
             }
         }
@@ -156,11 +203,54 @@ public class World : MonoBehaviour
         int chunkSize = data.chunkSize;
         for (int x = 0; x < chunkSize; x++)
         {
-            for (int y = 0; y < chunkHeight; y++)
+            for (int z = 0; z < chunkSize; z++)
             {
-                for (int z = 0; z < chunkSize; z++)
+                BlockType voxelType = preMadeArray[x, z] ? BlockType.Wall : BlockType.Air;
+                for (int y = 0; y < chunkHeight; y++)
                 {
-                    BlockType voxelType = preMadeArray[x, y] ? BlockType.Wall : BlockType.Air;
+                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
+                }
+            }
+        }
+    }
+    private void GenerateVoxelsFrom2DFloatArray(ChunkData data, float[,] preMadeArray)
+    {
+        int chunkSize = data.chunkSize;
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int z = 0; z < chunkSize; z++)
+            {
+                int groundPosition = Mathf.RoundToInt(preMadeArray[x,z] * chunkHeight);
+                BlockType voxelType = BlockType.Air;
+
+                for (int y = 0; y < groundPosition; y++)
+                {
+                    voxelType = BlockType.Wall;
+                    //if (y > groundPosition)
+                    //{
+                    //    voxelType = BlockType.Air;
+                    //}
+                    if (y == groundPosition - 1)
+                    {
+                        voxelType = BlockType.Ground;
+                    }
+
+                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
+                }
+            }
+        }
+    }
+
+    private void GenerateVoxelsFrom2DIntArray(ChunkData data, int[,] preMadeArray)
+    {
+        int chunkSize = data.chunkSize;
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int z = 0; z < chunkSize; z++)
+            {
+                BlockType voxelType = BlockType.Wall;
+                for (int y = 0; y < preMadeArray[x,z]; y++)
+                {
                     Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
                 }
             }
@@ -193,9 +283,9 @@ public class World : MonoBehaviour
 
     private bool[,,] ExtractChunkArray(bool[,,] worldArray, int chunkX, int chunkZ, int chunkSize, int chunkHeight, int lengthX, int lengthY, int lengthZ)
     {
-        // Calculate the start indices for X, Y, and Z dimensions.
+       
         int startX = chunkX * chunkSize;
-        int startY = 0; // Assuming Y starts from 0 for every chunk.
+        int startY = 0; 
         int startZ = chunkZ * chunkSize;
         
 
@@ -221,6 +311,87 @@ public class World : MonoBehaviour
                     }
                 }
             }
+        }
+
+        return chunkArray;
+    }
+
+    private bool[,] ExtractChunkArray(bool[,] worldArray, int chunkX, int chunkZ, int chunkSize, int lengthX, int lengthZ)
+    {
+
+        int startX = chunkX * chunkSize;
+        int startZ = chunkZ * chunkSize;
+
+        bool[,] chunkArray = new bool[chunkSize, chunkSize];
+
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int z = 0; z < chunkSize; z++)
+            {
+                if ((startX + x) < lengthX  && (startZ + z) < lengthZ)
+                {
+                     chunkArray[x, z] = worldArray[startX + x, startZ + z];
+                }
+                else
+                {
+                    chunkArray[x, z] = false;
+                }
+            }
+            
+        }
+
+        return chunkArray;
+    }
+
+    private float[,] ExtractChunkArray(float[,] worldArray, int chunkX, int chunkZ, int chunkSize, int lengthX, int lengthZ)
+    {
+
+        int startX = chunkX * chunkSize;
+        int startZ = chunkZ * chunkSize;
+
+        float[,] chunkArray = new float[chunkSize, chunkSize];
+
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int z = 0; z < chunkSize; z++)
+            {
+                if ((startX + x) < lengthX && (startZ + z) < lengthZ)
+                {
+                    chunkArray[x, z] = worldArray[startX + x, startZ + z];
+                }
+                else
+                {
+                    chunkArray[x, z] = 0f;
+                }
+            }
+
+        }
+
+        return chunkArray;
+    }
+
+    private int[,] ExtractChunkArray(int[,] worldArray, int chunkX, int chunkZ, int chunkSize, int lengthX, int lengthZ)
+    {
+
+        int startX = chunkX * chunkSize;
+        int startZ = chunkZ * chunkSize;
+
+        int[,] chunkArray = new int[chunkSize, chunkSize];
+
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int z = 0; z < chunkSize; z++)
+            {
+                if ((startX + x) < lengthX && (startZ + z) < lengthZ)
+                {
+                    chunkArray[x, z] = worldArray[startX + x, startZ + z];
+                }
+                else
+                {
+                    chunkArray[x, z] = 0;
+                }
+            }
+
         }
 
         return chunkArray;

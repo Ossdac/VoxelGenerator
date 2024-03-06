@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Voxelizer : MonoBehaviour
@@ -16,8 +17,12 @@ public class Voxelizer : MonoBehaviour
     {
         if (targetObject != null)
         {
-            VoxelizeObject(targetObject);
+            GameObject instantiatedObject = Instantiate(targetObject, transform.position, Quaternion.identity);
+
+            VoxelizeObject(instantiatedObject);
             world.GenerateWorld(voxelGrid);
+
+            Destroy(instantiatedObject);
         }
     }
 

@@ -1,4 +1,111 @@
-===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\BlockDataManager.cs =====
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\CameraController.cs =====
+using UnityEngine;
+
+public class SimpleCameraControl : MonoBehaviour
+{
+    public float movementSpeed = 5.0f;
+    public float mouseSensitivity = 100.0f;
+    public bool enableCollision = true; // Serialized bool to toggle collision detection
+    public LayerMask collisionLayerMask; // Define which layers the camera should collide with
+
+    private float xRotation = 0f;
+    private float yRotation = 0f;
+
+    // Collider settings
+    public float sphereRadius = 0.5f; // Radius for SphereCast
+    public float collisionOffset = 0.1f; // Offset to prevent clipping into collision objects
+
+    void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.C)){
+            enableCollision = !enableCollision;
+        }
+        RotateCamera();
+        Vector3 movement = GetInputMovement();
+        if (enableCollision)
+        {
+            MoveWithCollision(movement);
+        }
+        else
+        {
+            transform.position += movement;
+        }
+
+        ToggleCursorVisibility();
+    }
+
+    void RotateCamera()
+    {
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+
+        xRotation -= mouseY;
+        yRotation += mouseX;
+        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+
+        Quaternion cameraTurnAngle = Quaternion.Euler(xRotation, yRotation, 0f);
+        transform.localRotation = cameraTurnAngle;
+    }
+
+    Vector3 GetInputMovement()
+    {
+        float x = Input.GetAxis("Horizontal");
+        float z = Input.GetAxis("Vertical");
+        Vector3 move = transform.right * x + transform.forward * z;
+        return move * movementSpeed * Time.deltaTime;
+    }
+
+    void MoveWithCollision(Vector3 movement)
+    {
+        int maxCollisions = 3; // Set to the maximum number of collisions you expect to handle
+        int collisionCount = 0;
+
+        while (movement.magnitude > 0f && collisionCount < maxCollisions)
+        {
+            RaycastHit hit;
+            Vector3 direction = movement.normalized;
+            float distance = movement.magnitude + sphereRadius + collisionOffset;
+
+            // Perform a SphereCast in the direction of movement to check for collisions
+            if (Physics.SphereCast(transform.position, sphereRadius, direction, out hit, distance, collisionLayerMask))
+            {
+                // Calculate movement parallel to the collision surface
+                Vector3 slideMovement = Vector3.ProjectOnPlane(movement, hit.normal);
+
+                // Reduce the movement by a tiny factor to prevent sticking to surfaces due to floating point precision errors
+                slideMovement *= 0.98f;
+
+                movement = slideMovement;
+                collisionCount++;
+            }
+            else
+            {
+                transform.position += movement;
+                break; // No collision, apply remaining movement and exit loop
+            }
+        }
+    }
+
+
+    void ToggleCursorVisibility()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+    }
+}
+
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\CameraController.cs =====
+
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\BlockDataManager.cs =====
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,9 +131,9 @@ public class BlockDataManager : MonoBehaviour
     }
 }
 
-===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\BlockDataManager.cs =====
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\BlockDataManager.cs =====
 
-===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\BlockDataSO.cs =====
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\BlockDataSO.cs =====
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -47,9 +154,1199 @@ public class TextureData
 }
 
 
-===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\BlockDataSO.cs =====
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\BlockDataSO.cs =====
 
-===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\BlockHelper.cs =====
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\BlockType.cs =====
+public enum BlockType
+{
+    Nothing,
+    Air,
+    Wall,
+    Ground
+}
+
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\BlockType.cs =====
+
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Direction.cs =====
+﻿public enum Direction
+{
+    foreward,  // z+ direction
+    right,  // +x direction
+    backwards,   // -z direction
+    left,   // -x direction
+    up,     // +y direction
+    down    // -y direction
+};
+
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Direction.cs =====
+
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\DirectionExtensions.cs =====
+﻿using System;
+using UnityEngine;
+
+public static class DirectionExtensions
+{
+    public static Vector3Int GetVector(this Direction direction)
+    {
+        return direction switch
+        {
+            Direction.up => Vector3Int.up,
+            Direction.down => Vector3Int.down,
+            Direction.right => Vector3Int.right,
+            Direction.left => Vector3Int.left,
+            Direction.foreward => Vector3Int.forward,
+            Direction.backwards => Vector3Int.back,
+            _ => throw new Exception("Invalid input direction")
+        };
+    }
+}
+
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\DirectionExtensions.cs =====
+
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\MeshData.cs =====
+using System.Collections.Generic;
+using UnityEngine;
+
+public class MeshData
+{
+    public List<Vector3> vertices = new();
+    public List<int> triangles = new();
+    public List<Vector2> uv = new();
+
+    public List<Vector3> colliderVertices = new();
+    public List<int> colliderTriangles = new();
+
+
+    public MeshData()
+    {
+
+    }
+
+    public void AddVertex(Vector3 vertex)
+    {
+        vertices.Add(vertex);
+        colliderVertices.Add(vertex);
+    }
+
+    public void AddQuadTriangles()
+    {
+        triangles.Add(vertices.Count - 4);
+        triangles.Add(vertices.Count - 3);
+        triangles.Add(vertices.Count - 2);
+
+        triangles.Add(vertices.Count - 4);
+        triangles.Add(vertices.Count - 2);
+        triangles.Add(vertices.Count - 1);
+
+        colliderTriangles.Add(colliderVertices.Count - 4);
+        colliderTriangles.Add(colliderVertices.Count - 3);
+        colliderTriangles.Add(colliderVertices.Count - 2);
+
+        colliderTriangles.Add(colliderVertices.Count - 4);
+        colliderTriangles.Add(colliderVertices.Count - 2);
+        colliderTriangles.Add(colliderVertices.Count - 1);
+
+
+    }
+}
+
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\MeshData.cs =====
+
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\World.cs =====
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UIElements;
+
+public class World : MonoBehaviour
+{
+    public int mapSizeInChunks = 6;
+    public int chunkSize = 16, chunkHeight = 100;
+    public float noiseScale = 0.03f;
+    public GameObject chunkPrefab;
+    [SerializeField] private bool renderDown;
+
+    Dictionary<Vector3Int, ChunkData> chunkDataDictionary = new Dictionary<Vector3Int, ChunkData>();
+    Dictionary<Vector3Int, ChunkRenderer> chunkDictionary = new Dictionary<Vector3Int, ChunkRenderer>();
+
+    private void Awake()
+    {
+        BlockHelper.RenderDown = renderDown;
+    }
+
+    [ContextMenu("Generate New World")]
+    public void GenerateWorld()
+    {
+        ClearWorld();
+
+        for (int x = 0; x < mapSizeInChunks; x++)
+        {
+            for (int z = 0; z < mapSizeInChunks; z++)
+            {
+
+                ChunkData data = new ChunkData(chunkSize, chunkHeight, this, new Vector3Int(x * chunkSize, 0, z * chunkSize));
+                GenerateVoxels(data);
+                chunkDataDictionary.Add(data.worldPosition, data);
+            }
+        }
+
+        foreach (ChunkData data in chunkDataDictionary.Values)
+        {
+            MeshData meshData = Chunk.GetChunkMeshData(data);
+            GameObject chunkObject = Instantiate(chunkPrefab, data.worldPosition, Quaternion.identity);
+            ChunkRenderer chunkRenderer = chunkObject.GetComponent<ChunkRenderer>();
+            chunkDictionary.Add(data.worldPosition, chunkRenderer);
+            chunkRenderer.InitializeChunk(data);
+            chunkRenderer.UpdateChunk(meshData);
+
+        }
+    }
+
+    public void GenerateWorld(bool[,,] worldArray)
+    {
+        ClearWorld();
+
+        int lengthX = worldArray.GetLength(0);
+        int lengthY = worldArray.GetLength(1);
+        int lengthZ = worldArray.GetLength(2);
+        int chunkCountX = lengthX / chunkSize;
+        int chunksY = lengthY;
+        int chunkCountZ = lengthZ / chunkSize;
+
+        chunkHeight = chunksY;
+
+        for (int x = 0; x <= chunkCountX; x++)
+        {
+            for (int z = 0; z <= chunkCountZ; z++)
+            {
+                Vector3Int chunkPosition = new Vector3Int(x * chunkSize, 0, z * chunkSize);
+                ChunkData chunkData = new ChunkData(chunkSize, chunksY, this, chunkPosition);
+                bool[,,] chunkArray = ExtractChunkArray(worldArray, x, z, chunkSize, chunksY, lengthX, lengthY, lengthZ);
+                GenerateVoxelsFrom3DBoolArray(chunkData, chunkArray);
+                CreateAndRegisterChunk(chunkData);
+            }
+        }
+    }
+
+
+    public void GenerateWorld(bool[,] worldArray)
+    {
+        ClearWorld();
+
+        int lengthX = worldArray.GetLength(0);
+        int lengthZ = worldArray.GetLength(1);
+        int chunkCountX = Mathf.CeilToInt((float)lengthX / chunkSize);
+        int chunkCountZ = Mathf.CeilToInt((float)lengthZ / chunkSize);
+
+        for (int x = 0; x < chunkCountX; x++)
+        {
+            for (int z = 0; z < chunkCountZ; z++)
+            {
+                Vector3Int chunkPosition = new Vector3Int(x * chunkSize, 0, z * chunkSize);
+                ChunkData chunkData = new ChunkData(chunkSize, chunkHeight, this, chunkPosition);
+                bool[,] chunkArray = ExtractChunkArray(worldArray, x, z, chunkSize, lengthX, lengthZ);
+                GenerateVoxelsFrom2DBoolArray(chunkData, chunkArray); 
+                CreateAndRegisterChunk(chunkData);
+            }
+        }
+    }
+
+    public void GenerateWorld(int[,] worldArray)
+    {
+        ClearWorld();
+
+        int lengthX = worldArray.GetLength(0);
+        int lengthZ = worldArray.GetLength(1);
+        int chunkCountX = Mathf.CeilToInt((float)lengthX / chunkSize);
+        int chunkCountZ = Mathf.CeilToInt((float)lengthZ / chunkSize);
+
+        for (int x = 0; x < chunkCountX; x++)
+        {
+            for (int z = 0; z < chunkCountZ; z++)
+            {
+                Vector3Int chunkPosition = new Vector3Int(x * chunkSize, 0, z * chunkSize);
+                ChunkData chunkData = new ChunkData(chunkSize, chunkHeight, this, chunkPosition);
+                int[,] chunkArray = ExtractChunkArray(worldArray, x, z, chunkSize, lengthX, lengthZ);
+                GenerateVoxelsFrom2DIntArray(chunkData, chunkArray);
+                CreateAndRegisterChunk(chunkData);
+            }
+        }
+    }
+
+    public void GenerateWorld(float[,] worldArray)
+    {
+        ClearWorld();
+
+        int lengthX = worldArray.GetLength(0);
+        int lengthZ = worldArray.GetLength(1);
+        int chunkCountX = worldArray.GetLength(0) / chunkSize;
+        int chunkCountZ = worldArray.GetLength(1) / chunkSize;
+
+        for (int x = 0; x <= chunkCountX; x++)
+        {
+            for (int z = 0; z <= chunkCountZ; z++)
+            {
+                Vector3Int chunkPosition = new Vector3Int(x * chunkSize, 0, z * chunkSize);
+                ChunkData chunkData = new ChunkData(chunkSize, chunkHeight, this, chunkPosition);
+                float[,] chunkArray = ExtractChunkArray(worldArray, x, z, chunkSize, lengthX, lengthZ);
+                GenerateVoxelsFrom2DFloatArray(chunkData, chunkArray);
+                CreateAndRegisterChunk(chunkData);
+            }
+        }
+    }
+
+
+
+    private void ClearWorld()
+    {
+        chunkDataDictionary.Clear();
+        foreach (ChunkRenderer chunk in chunkDictionary.Values)
+        {
+            Destroy(chunk.gameObject);
+        }
+        chunkDictionary.Clear();
+    }
+
+    private void GenerateVoxels(ChunkData data)
+    {
+        int chunkSize = data.chunkSize;
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int z = 0; z < chunkSize; z++)
+            {
+                float noiseValue = Mathf.PerlinNoise((data.worldPosition.x + x) * noiseScale, (data.worldPosition.z + z) * noiseScale);
+                int groundPosition = Mathf.RoundToInt(noiseValue * chunkHeight);
+                for (int y = 0; y < chunkHeight; y++)
+                {
+                    BlockType voxelType = BlockType.Wall;
+                    if (y > groundPosition)
+                    {
+                        voxelType = BlockType.Air;
+                    }
+                    else if (y == groundPosition)
+                    {
+                        voxelType = BlockType.Ground;
+                    }
+
+                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
+                }
+            }
+        }
+    }
+
+
+
+    private void GenerateVoxelsFrom3DBoolArray(ChunkData data, bool[,,] preMadeArray)
+    {
+        int chunkSize = data.chunkSize;
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int y = 0; y < chunkHeight; y++)
+            {
+                for (int z = 0; z < chunkSize; z++)
+                {
+                    BlockType voxelType = preMadeArray[x, y, z] ? BlockType.Wall : BlockType.Air;
+                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
+                }
+            }
+        }
+    }
+
+    private void GenerateVoxelsFrom2DBoolArray(ChunkData data, bool[,] preMadeArray)
+    {
+        int chunkSize = data.chunkSize;
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int z = 0; z < chunkSize; z++)
+            {
+                BlockType voxelType = preMadeArray[x, z] ? BlockType.Wall : BlockType.Air;
+                for (int y = 0; y < chunkHeight; y++)
+                {
+                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
+                }
+            }
+        }
+    }
+    private void GenerateVoxelsFrom2DFloatArray(ChunkData data, float[,] preMadeArray)
+    {
+        int chunkSize = data.chunkSize;
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int z = 0; z < chunkSize; z++)
+            {
+                int groundPosition = Mathf.RoundToInt(preMadeArray[x,z] * chunkHeight);
+                BlockType voxelType = BlockType.Air;
+
+                for (int y = 0; y < groundPosition; y++)
+                {
+                    voxelType = BlockType.Wall;
+                    //if (y > groundPosition)
+                    //{
+                    //    voxelType = BlockType.Air;
+                    //}
+                    if (y == groundPosition - 1)
+                    {
+                        voxelType = BlockType.Ground;
+                    }
+
+                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
+                }
+            }
+        }
+    }
+
+    private void GenerateVoxelsFrom2DIntArray(ChunkData data, int[,] preMadeArray)
+    {
+        int chunkSize = data.chunkSize;
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int z = 0; z < chunkSize; z++)
+            {
+                BlockType voxelType = BlockType.Wall;
+                for (int y = 0; y < preMadeArray[x,z]; y++)
+                {
+                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
+                }
+            }
+        }
+    }
+
+
+    internal BlockType GetBlockFromChunkCoordinates(int x, int y, int z)
+    {
+        Vector3Int pos = Chunk.ChunkPositionFromBlockCoords(this, x, y, z);
+        ChunkData containerChunk;
+
+        chunkDataDictionary.TryGetValue(pos, out containerChunk);
+
+        if (containerChunk == null)
+            return BlockType.Nothing;
+        Vector3Int blockInCHunkCoordinates = Chunk.GetBlockInChunkCoordinates(containerChunk, new Vector3Int(x, y, z));
+        return Chunk.GetBlockFromChunkCoordinates(containerChunk, blockInCHunkCoordinates);
+    }
+
+    private void CreateAndRegisterChunk(ChunkData chunkData)
+    {
+        GameObject chunkObject = Instantiate(chunkPrefab, chunkData.worldPosition, Quaternion.identity);
+        ChunkRenderer chunkRenderer = chunkObject.GetComponent<ChunkRenderer>();
+        chunkRenderer.InitializeChunk(chunkData);
+        chunkRenderer.UpdateChunk();
+        chunkDataDictionary.Add(chunkData.worldPosition, chunkData);
+        chunkDictionary.Add(chunkData.worldPosition, chunkRenderer);
+    }
+
+    private bool[,,] ExtractChunkArray(bool[,,] worldArray, int chunkX, int chunkZ, int chunkSize, int chunkHeight, int lengthX, int lengthY, int lengthZ)
+    {
+       
+        int startX = chunkX * chunkSize;
+        int startY = 0; 
+        int startZ = chunkZ * chunkSize;
+        
+
+        // Initialize the new array for the chunk.
+        bool[,,] chunkArray = new bool[chunkSize, chunkHeight, chunkSize];
+
+        // Iterate over each dimension and copy the values.
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int y = 0; y < chunkHeight; y++)
+            {
+                for (int z = 0; z < chunkSize; z++)
+                {
+                    // Ensure we don't exceed the worldArray's bounds.
+                    if ((startX + x) < lengthX && (startY + y) < lengthY && (startZ + z) < lengthZ)
+                    {
+                        chunkArray[x, y, z] = worldArray[startX + x, startY + y, startZ + z];
+                    }
+                    else
+                    {
+                        // Optionally handle out-of-bounds with a default value, e.g., false for no block.
+                        chunkArray[x, y, z] = false;
+                    }
+                }
+            }
+        }
+
+        return chunkArray;
+    }
+
+    private bool[,] ExtractChunkArray(bool[,] worldArray, int chunkX, int chunkZ, int chunkSize, int lengthX, int lengthZ)
+    {
+
+        int startX = chunkX * chunkSize;
+        int startZ = chunkZ * chunkSize;
+
+        bool[,] chunkArray = new bool[chunkSize, chunkSize];
+
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int z = 0; z < chunkSize; z++)
+            {
+                if ((startX + x) < lengthX  && (startZ + z) < lengthZ)
+                {
+                     chunkArray[x, z] = worldArray[startX + x, startZ + z];
+                }
+                else
+                {
+                    chunkArray[x, z] = false;
+                }
+            }
+            
+        }
+
+        return chunkArray;
+    }
+
+    private float[,] ExtractChunkArray(float[,] worldArray, int chunkX, int chunkZ, int chunkSize, int lengthX, int lengthZ)
+    {
+
+        int startX = chunkX * chunkSize;
+        int startZ = chunkZ * chunkSize;
+
+        float[,] chunkArray = new float[chunkSize, chunkSize];
+
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int z = 0; z < chunkSize; z++)
+            {
+                if ((startX + x) < lengthX && (startZ + z) < lengthZ)
+                {
+                    chunkArray[x, z] = worldArray[startX + x, startZ + z];
+                }
+                else
+                {
+                    chunkArray[x, z] = 0f;
+                }
+            }
+
+        }
+
+        return chunkArray;
+    }
+
+    private int[,] ExtractChunkArray(int[,] worldArray, int chunkX, int chunkZ, int chunkSize, int lengthX, int lengthZ)
+    {
+
+        int startX = chunkX * chunkSize;
+        int startZ = chunkZ * chunkSize;
+
+        int[,] chunkArray = new int[chunkSize, chunkSize];
+
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int z = 0; z < chunkSize; z++)
+            {
+                if ((startX + x) < lengthX && (startZ + z) < lengthZ)
+                {
+                    chunkArray[x, z] = worldArray[startX + x, startZ + z];
+                }
+                else
+                {
+                    chunkArray[x, z] = 0;
+                }
+            }
+
+        }
+
+        return chunkArray;
+    }
+
+
+}
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\World.cs =====
+
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Array generator\GameOfLife.cs =====
+using UnityEngine;
+
+[System.Serializable]
+public abstract class GameOfLife : MonoBehaviour
+{
+    [SerializeField]protected World world;
+
+    [SerializeField] protected int size = 50;
+
+    [SerializeField] protected Vector2Int birthRange = new Vector2Int(3, 3);
+    [SerializeField] protected Vector2Int deathRange = new Vector2Int(1, 4);
+
+    [SerializeField] protected float saturationValue = 0.5f;
+
+    protected int lowBirth;
+    protected int highBirth;
+    protected int lowDeath;
+    protected int highDeath;
+
+    private void InitializeState()
+    {
+        lowBirth = birthRange.x; highBirth = birthRange.y;
+        lowDeath = deathRange.x; highDeath = deathRange.y; 
+    }
+
+    public void PerformUpdate()
+    {
+        InitializeState();
+        CustomUpdateState();
+    }
+
+    public abstract void InitializePattern();
+    public abstract void CustomUpdateState();
+
+    public abstract void RenderWorld();
+}
+
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Array generator\GameOfLife.cs =====
+
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Array generator\GameOfLife2D.cs =====
+using UnityEngine;
+
+public class GameOfLife2D : GameOfLife 
+{
+
+
+    private bool[,] stateA;
+    private bool[,] stateB;
+    private bool useA = true;
+
+    private void Start()
+    {
+        stateA = new bool[size,size];
+        stateB = new bool[size,size];
+    }
+
+
+    override
+    public void CustomUpdateState()
+    {
+
+        if (useA)
+        {
+            UpdateState(stateA, stateB);
+            world.GenerateWorld(stateA); 
+        }
+        else
+        {
+            UpdateState(stateB, stateA);
+            world.GenerateWorld(stateB);
+        }
+
+        useA = !useA;
+    }
+
+    override
+    public void InitializePattern()
+    {
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                stateA[x, y] = Random.value < saturationValue;
+            }
+        }
+        
+    }
+
+    override
+    public void RenderWorld()
+    { 
+        if (useA)
+            world.GenerateWorld(stateA);
+        else
+            world.GenerateWorld(stateB);
+    }
+
+    public void UpdateState(bool[,] current, bool[,] next)
+    {
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                int neighbors = CountNeighbors(x, y, current);
+
+                if (!current[x, y] && neighbors >= lowBirth && neighbors <= highBirth)
+                    next[x, y] = true;
+                else if (current[x, y] && (neighbors <= lowDeath || neighbors >= highDeath))
+                    next[x, y] = false;
+                else
+                    next[x, y] = current[x, y];
+            }
+        }
+    }
+
+    int CountNeighbors(int x, int y, bool[,] state)
+    {
+        int count = 0;
+        for (int i = -1; i <= 1; i++)
+        {
+            for (int j = -1; j <= 1; j++)
+            {
+                if (i == 0 && j == 0) continue;
+
+                int nx = x + i;
+                int ny = y + j;
+
+                if (nx >= 0 && ny >= 0 && nx < size && ny < size && state[nx, ny])
+                    count++;
+            }
+        }
+        return count;
+    }
+}
+
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Array generator\GameOfLife2D.cs =====
+
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Array generator\GameOfLife3D.cs =====
+using UnityEngine;
+
+public class GameOfLife3D : GameOfLife
+{
+    private bool[,,] stateA;
+    private bool[,,] stateB;
+    private bool useA = true;
+
+    [SerializeField ] private bool bottomFill;
+    [SerializeField ] private bool topFill;
+    [SerializeField ] private bool diagonalsFill;
+
+    void Start()
+    {
+        stateA = new bool[size, size, size];
+        stateB = new bool[size, size, size];
+    }
+
+    override
+    public void CustomUpdateState()
+    {
+        if (useA)
+        {
+            UpdateState(stateA, stateB);
+            world.GenerateWorld(stateA);
+        }
+        else
+        {
+            UpdateState(stateB, stateA);
+            world.GenerateWorld(stateB);
+        }
+
+        useA = !useA; // Swap which array is active
+    }
+
+    override
+    public void InitializePattern()
+    {
+        useA = true;
+        stateA = new bool[size, size, size];
+        bool totalFill = true;
+        if (bottomFill)
+        {
+            totalFill = false;
+            for (int x = 0; x < size; x++)
+            {
+                for (int z = 0; z < size; z++)
+                {
+                    stateA[x, 0, z] = Random.value < saturationValue;
+                    
+                }
+            }
+        }
+        if (topFill)
+        {
+            totalFill = false;
+            for (int x = 0; x < size; x++)
+            {
+                for (int z = 0; z < size; z++)
+                {
+                    stateA[x, size-1, z] = Random.value < saturationValue;  
+                }
+            }
+        }
+        if (diagonalsFill)
+        {
+            totalFill = false;
+            for (int x = 0; x < size; x++)
+            {
+                for (int y = 0; y < size; y++)
+                {
+                    for (int z = 0; z < size; z++)
+                    {
+                        if (x-(2*y)+z == 0)
+                        stateA[x, y, z] = Random.value < saturationValue;
+                    }
+                }
+            }
+        }
+        if (totalFill)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                for (int y = 0; y < size; y++)
+                {
+                    for (int z = 0; z < size; z++)
+                    {
+                        stateA[x, y, z] = Random.value < saturationValue;
+                    }
+                }
+            }
+        }
+    }
+
+    override
+    public void RenderWorld()
+    {
+        if (useA)
+            world.GenerateWorld(stateA);
+        else
+            world.GenerateWorld(stateB);
+    }
+
+
+    private void UpdateState(bool[,,] current, bool[,,] next)
+    {
+
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                for (int z = 0; z < size; z++)
+                {
+                    int neighbors = CountNeighbors(x, y, z, current);
+
+                    if (!current[x, y, z] && neighbors >= lowBirth && neighbors <= highBirth)
+                        next[x, y, z] = true;
+                    else if (current[x, y, z] && (neighbors <= lowDeath || neighbors >= highDeath))
+                        next[x, y, z] = false;
+                    else
+                        next[x, y, z] = current[x, y, z];
+                }
+            }
+        }
+    }
+
+    int CountNeighbors(int x, int y, int z, bool[,,] state)
+    {
+        int count = 0;
+        for (int i = -1; i <= 1; i++)
+        {
+            for (int j = -1; j <= 1; j++)
+            {
+                for (int k = -1; k <= 1; k++)
+                {
+                    if (i == 0 && j == 0 && k == 0) continue; // Skip the cell itself
+
+                    int nx = x + i;
+                    int ny = y + j;
+                    int nz = z + k;
+
+                    
+                    if (nx < 0 || ny < 0 || nz < 0 || nx >= size || ny >= size || nz >= size) { 
+                        //count += 1;
+                    }
+                    else if (state[nx, ny, nz])
+                        count += 1;
+                }
+            }
+        }
+        return count;
+    }
+}
+
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Array generator\GameOfLife3D.cs =====
+
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Array generator\GameOfLifeController.cs =====
+using UnityEngine;
+
+public class GameOfLifeController : MonoBehaviour
+{
+
+    [SerializeField] private GameOfLife[] gamesOfLife;
+    [SerializeField] private GameOfLife currentGame;
+
+    [SerializeField] private float updateInterval = 1.0f;
+
+    [SerializeField]private bool manualUpdateClick = false;
+    [SerializeField]private bool manualUpdateHold = false;
+
+    private float timer = 0f;
+    [SerializeField] private int gameIndex;
+
+    private void Start()
+    {
+        gameIndex %= gamesOfLife.Length;
+        currentGame = gamesOfLife[gameIndex];
+
+        foreach (GameOfLife game in gamesOfLife)
+        {
+            game.InitializePattern();
+        }
+        currentGame.RenderWorld();
+    }
+
+    void Update()
+    {
+        HandleInput();
+        if (!manualUpdateClick && !manualUpdateHold)
+        {
+            UpdateLifeCycle();
+        }
+    }
+
+
+    [ContextMenu("Reset")]
+    private void Reset()
+    {
+        currentGame.InitializePattern();
+        currentGame.RenderWorld();
+    }
+
+    private void HandleInput()
+    {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            currentGame.InitializePattern();
+            currentGame.RenderWorld();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && (manualUpdateClick || manualUpdateHold))
+        {
+            UpdateLifeCycle();
+        }
+
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            manualUpdateClick = !manualUpdateClick; 
+            manualUpdateHold = !manualUpdateClick;
+        }
+
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            manualUpdateClick = false; manualUpdateHold = false;
+        }
+
+        if (Input.GetKeyDown(KeyCode.N))
+        {
+            NextGame();
+        }
+
+    }
+
+    private void UpdateLifeCycle()
+    {
+        timer += Time.deltaTime;
+        if (timer >= updateInterval)
+        {
+            currentGame.PerformUpdate();
+            timer = 0f;
+        }
+    }
+
+    private void NextGame()
+    {
+        gameIndex = (gameIndex + 1) % gamesOfLife.Length;
+        currentGame = gamesOfLife[gameIndex];
+    }
+}
+
+
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Array generator\GameOfLifeController.cs =====
+
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Array generator\GameOfLifePerlin.cs =====
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+
+public class GameOfLifePerlin : GameOfLife
+{
+    private float[,] stateA;
+    private float[,] stateB;
+    private bool useA = true;
+
+    [SerializeField] private float noiseScale = 0.03f;
+    [SerializeField] private float waveXSpeed = .05f;
+    [SerializeField] private float waveYSpeed = .05f;
+
+    private float offsetX = 0;
+    private float offsetY = 0;
+
+
+    private void Start()
+    {
+        stateA = new float[size, size];
+        stateB = new float[size, size];
+    }
+
+    override
+    public void CustomUpdateState()
+    {
+        offsetX += waveXSpeed;
+        offsetY += waveYSpeed;
+        if (useA)
+        {
+            UpdateState(stateA, stateB);
+            world.GenerateWorld(stateA);
+        }
+        else
+        {
+            UpdateState(stateB, stateA);
+            world.GenerateWorld(stateB);
+        }
+
+        useA = !useA;
+    }
+    override
+    public void InitializePattern()
+    {
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                stateA[x, y] = Random.value < saturationValue? Mathf.PerlinNoise(x * noiseScale, y * noiseScale) : 0f;
+            }
+        }
+    }
+
+    override
+    public void RenderWorld()
+    {
+        if (useA)
+            world.GenerateWorld(stateA);
+        else
+            world.GenerateWorld(stateB);
+    }
+
+    public void UpdateState(float[,] current, float[,] next)
+    {
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                int neighbors = CountNeighbors(x, y, current);
+
+                if (neighbors >= lowBirth && neighbors <= highBirth)
+                    next[x, y] = Mathf.PerlinNoise((x * noiseScale) + offsetX, (y * noiseScale) + offsetY);
+                else if (neighbors <= lowDeath || neighbors >= highDeath)
+                    next[x, y] = 0f;
+                else if (current[x, y] > 0f)
+                    next[x, y] = Mathf.PerlinNoise((x * noiseScale) + offsetX, (y * noiseScale) + offsetY);
+                else
+                    next[x, y] = 0;
+
+                
+            }
+        }
+    }
+
+    int CountNeighbors(int x, int y, float[,] state)
+    {
+        int count = 0;
+        for (int i = -1; i <= 1; i++)
+        {
+            for (int j = -1; j <= 1; j++)
+            {
+                if (i == 0 && j == 0) continue;
+
+                int nx = x + i;
+                int ny = y + j;
+
+                if (nx >= 0 && ny >= 0 && nx < size && ny < size && state[nx, ny] > 0f)
+                    count++;
+            }
+        }
+        return count;
+    }
+}
+
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Array generator\GameOfLifePerlin.cs =====
+
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Array generator\GameOfLifeSurvivor.cs =====
+using UnityEngine;
+
+public class GameOfLifeSurvivor : GameOfLife
+{
+
+
+    private int[,] stateA;
+    private int[,] stateB;
+    private bool useA = true;
+
+    private void Start()
+    {
+        stateA = new int[size, size];
+        stateB = new int[size, size];
+    }
+
+
+    override
+    public void CustomUpdateState()
+    {
+
+        if (useA)
+        {
+            UpdateState(stateA, stateB);
+            world.GenerateWorld(stateA);
+        }
+        else
+        {
+            UpdateState(stateB, stateA);
+            world.GenerateWorld(stateB);
+        }
+
+        useA = !useA;
+    }
+
+    override
+    public void InitializePattern()
+    {
+        
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                stateA[x, y] = Random.value < saturationValue ? 1 : 0;
+            }
+        }
+        
+    }
+
+    override
+    public void RenderWorld()
+    {
+        if (useA)
+            world.GenerateWorld(stateA);
+        else
+            world.GenerateWorld(stateB);
+    }
+
+    public void UpdateState(int[,] current, int[,] next)
+    {
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                int neighbors = CountNeighbors(x, y, current);
+
+                if (neighbors >= lowBirth && neighbors <= highBirth)
+                    next[x, y] += 1;
+                else if (current[x, y] > 0 && (neighbors <= lowDeath || neighbors >= highDeath))
+                    next[x, y] -= 1;
+                else
+                    next[x, y] = current[x, y];
+            }
+        }
+    }
+
+    int CountNeighbors(int x, int y, int[,] state)
+    {
+        int count = 0;
+        for (int i = -1; i <= 1; i++)
+        {
+            for (int j = -1; j <= 1; j++)
+            {
+                if (i == 0 && j == 0) continue;
+
+                int nx = x + i;
+                int ny = y + j;
+
+                if (nx >= 0 && ny >= 0 && nx < size && ny < size)
+                    count += state[nx, ny];
+            }
+        }
+        return count;
+    }
+}
+
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Array generator\GameOfLifeSurvivor.cs =====
+
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Array generator\Voxelizer.cs =====
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Voxelizer : MonoBehaviour
+{
+    public GameObject targetObject;
+    public int sizeLongestAxis = 100; // Size for the longest axis in the voxel grid
+    private Vector3Int arrayDimensions;
+    private bool[,,] voxelGrid;
+
+    [SerializeField] private World world;
+
+    [SerializeField] private bool autoSize;
+
+    [ContextMenu("Reset")]
+    void Start()
+    {
+        if (targetObject != null)
+        {
+            GameObject instantiatedObject = Instantiate(targetObject, transform.position, Quaternion.identity);
+
+            VoxelizeObject(instantiatedObject);
+            world.GenerateWorld(voxelGrid);
+
+            Destroy(instantiatedObject);
+        }
+    }
+
+    void VoxelizeObject(GameObject obj)
+    {
+        Bounds bounds = CalculateBounds(obj);
+        CalculateArrayDimensions(bounds);
+        voxelGrid = new bool[arrayDimensions.x, arrayDimensions.y, arrayDimensions.z];
+        FillVoxelGrid(bounds);
+    }
+
+    Bounds CalculateBounds(GameObject obj)
+    {
+        var renderers = obj.GetComponentsInChildren<Renderer>();
+        Bounds bounds = new Bounds(obj.transform.position, Vector3.zero);
+        foreach (var renderer in renderers)
+        {
+            bounds.Encapsulate(renderer.bounds);
+        }
+        return bounds;
+    }
+
+    void CalculateArrayDimensions(Bounds bounds)
+    {
+        float longestSide = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
+        float xRatio = bounds.size.x / longestSide;
+        float yRatio = bounds.size.y / longestSide;
+        float zRatio = bounds.size.z / longestSide;
+
+        if (autoSize)
+            sizeLongestAxis = Mathf.CeilToInt(longestSide);
+        arrayDimensions = new Vector3Int(
+            Mathf.CeilToInt(sizeLongestAxis * xRatio),
+            Mathf.CeilToInt(sizeLongestAxis * yRatio),
+            Mathf.CeilToInt(sizeLongestAxis * zRatio));
+    }
+
+    void FillVoxelGrid(Bounds bounds)
+    {
+        int arrayDimensionsX = arrayDimensions.x;
+        int arrayDimensionsY = arrayDimensions.y;
+        int arrayDimensionsZ = arrayDimensions.z;
+        float voxelSizeX = bounds.size.x / arrayDimensionsX;
+        float voxelSizeY = bounds.size.y / arrayDimensionsY;
+        float voxelSizeZ = bounds.size.z / arrayDimensionsZ;
+        Vector3 voxelSize = new Vector3(bounds.size.x / arrayDimensionsX, bounds.size.y / arrayDimensionsY, bounds.size.z / arrayDimensionsZ);
+
+        for (int x = 0; x < arrayDimensionsX; x++)
+        {
+            for (int y = 0; y < arrayDimensionsY; y++)
+            {
+                for (int z = 0; z < arrayDimensionsZ; z++)
+                {
+                    Vector3 center = bounds.min + new Vector3(voxelSizeX * (x + 0.5f), voxelSizeY * (y + 0.5f), voxelSizeZ * (z + 0.5f));
+                    bool occupied = Physics.CheckBox(center, voxelSize * 0.5f, Quaternion.identity);
+                    voxelGrid[x, y, z] = occupied;
+                }
+            }
+        }
+    }
+}
+
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Array generator\Voxelizer.cs =====
+
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Chunks\BlockHelper.cs =====
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -180,127 +1477,9 @@ public static class BlockHelper
     }
 }
 
-===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\BlockHelper.cs =====
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Chunks\BlockHelper.cs =====
 
-===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\BlockType.cs =====
-public enum BlockType
-{
-    Nothing,
-    Air,
-    Wall,
-    Ground
-}
-
-===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\BlockType.cs =====
-
-===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\CameraController.cs =====
-using UnityEngine;
-
-public class SimpleCameraControl : MonoBehaviour
-{
-    public float movementSpeed = 5.0f;
-    public float mouseSensitivity = 100.0f;
-    public bool enableCollision = true; // Serialized bool to toggle collision detection
-    public LayerMask collisionLayerMask; // Define which layers the camera should collide with
-
-    private float xRotation = 0f;
-    private float yRotation = 0f;
-
-    // Collider settings
-    public float sphereRadius = 0.5f; // Radius for SphereCast
-    public float collisionOffset = 0.1f; // Offset to prevent clipping into collision objects
-
-    void Start()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.C)){
-            enableCollision = !enableCollision;
-        }
-        RotateCamera();
-        Vector3 movement = GetInputMovement();
-        if (enableCollision)
-        {
-            MoveWithCollision(movement);
-        }
-        else
-        {
-            transform.position += movement;
-        }
-
-        ToggleCursorVisibility();
-    }
-
-    void RotateCamera()
-    {
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
-
-        xRotation -= mouseY;
-        yRotation += mouseX;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-
-        Quaternion cameraTurnAngle = Quaternion.Euler(xRotation, yRotation, 0f);
-        transform.localRotation = cameraTurnAngle;
-    }
-
-    Vector3 GetInputMovement()
-    {
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
-        Vector3 move = transform.right * x + transform.forward * z;
-        return move * movementSpeed * Time.deltaTime;
-    }
-
-    void MoveWithCollision(Vector3 movement)
-    {
-        int maxCollisions = 3; // Set to the maximum number of collisions you expect to handle
-        int collisionCount = 0;
-
-        while (movement.magnitude > 0f && collisionCount < maxCollisions)
-        {
-            RaycastHit hit;
-            Vector3 direction = movement.normalized;
-            float distance = movement.magnitude + sphereRadius + collisionOffset;
-
-            // Perform a SphereCast in the direction of movement to check for collisions
-            if (Physics.SphereCast(transform.position, sphereRadius, direction, out hit, distance, collisionLayerMask))
-            {
-                // Calculate movement parallel to the collision surface
-                Vector3 slideMovement = Vector3.ProjectOnPlane(movement, hit.normal);
-
-                // Reduce the movement by a tiny factor to prevent sticking to surfaces due to floating point precision errors
-                slideMovement *= 0.98f;
-
-                movement = slideMovement;
-                collisionCount++;
-            }
-            else
-            {
-                transform.position += movement;
-                break; // No collision, apply remaining movement and exit loop
-            }
-        }
-    }
-
-
-    void ToggleCursorVisibility()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-    }
-}
-
-===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\CameraController.cs =====
-
-===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Chunk.cs =====
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Chunks\Chunk.cs =====
 ﻿using System;
 using UnityEngine;
 
@@ -318,9 +1497,11 @@ public static class Chunk
 
     private static Vector3Int GetPostitionFromIndex(ChunkData chunkData, int index)
     {
-        int x = index % chunkData.chunkSize;
-        int y = (index / chunkData.chunkSize) % chunkData.chunkHeight;
-        int z = index / (chunkData.chunkSize * chunkData.chunkHeight);
+        int chunkSize = chunkData.chunkSize;
+        int chunkHeight = chunkData.chunkHeight;
+        int x = index % chunkSize;
+        int y = (index /chunkSize) % chunkHeight;
+        int z = index / (chunkSize * chunkHeight);
         return new Vector3Int(x, y, z);
     }
 
@@ -398,18 +1579,20 @@ public static class Chunk
 
     internal static Vector3Int ChunkPositionFromBlockCoords(World world, int x, int y, int z)
     {
+        int chunkSize = world.chunkSize;
+        int chunkHeight = world.chunkHeight;
         Vector3Int pos = new()
         {
-            x = Mathf.FloorToInt(x / (float)world.chunkSize) * world.chunkSize,
-            y = Mathf.FloorToInt(y / (float)world.chunkHeight) * world.chunkHeight,
-            z = Mathf.FloorToInt(z / (float)world.chunkSize) * world.chunkSize
+            x = Mathf.FloorToInt(x / (float)chunkSize) * chunkSize,
+            y = Mathf.FloorToInt(y / (float)chunkHeight) *  chunkHeight,
+            z = Mathf.FloorToInt(z / (float)chunkSize) * chunkSize
         };
         return pos;
     }
 }
-===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Chunk.cs =====
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Chunks\Chunk.cs =====
 
-===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\ChunkData.cs =====
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Chunks\ChunkData.cs =====
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -434,9 +1617,9 @@ public class ChunkData
 
 }
 
-===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\ChunkData.cs =====
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Chunks\ChunkData.cs =====
 
-===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\ChunkRenderer.cs =====
+===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Chunks\ChunkRenderer.cs =====
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -515,573 +1698,14 @@ public class ChunkRenderer : MonoBehaviour
                 else
                     Gizmos.color = new Color(1, 0, 1, 0.4f);
 
-                Gizmos.DrawCube(transform.position + new Vector3(ChunkData.chunkSize / 2f, ChunkData.chunkHeight / 2f, ChunkData.chunkSize / 2f), new Vector3(ChunkData.chunkSize, ChunkData.chunkHeight, ChunkData.chunkSize));
+                int chunkSize = ChunkData.chunkSize;
+                int chunkHeight = ChunkData.chunkHeight;
+
+                Gizmos.DrawCube(transform.position + new Vector3(chunkSize / 2f, chunkHeight / 2f, chunkSize / 2f), new Vector3(chunkSize, chunkHeight, chunkSize));
             }
         }
     }
 #endif
 }
-===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\ChunkRenderer.cs =====
-
-===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Direction.cs =====
-﻿public enum Direction
-{
-    foreward,  // z+ direction
-    right,  // +x direction
-    backwards,   // -z direction
-    left,   // -x direction
-    up,     // +y direction
-    down    // -y direction
-};
-
-===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Direction.cs =====
-
-===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\DirectionExtensions.cs =====
-﻿using System;
-using UnityEngine;
-
-public static class DirectionExtensions
-{
-    public static Vector3Int GetVector(this Direction direction)
-    {
-        return direction switch
-        {
-            Direction.up => Vector3Int.up,
-            Direction.down => Vector3Int.down,
-            Direction.right => Vector3Int.right,
-            Direction.left => Vector3Int.left,
-            Direction.foreward => Vector3Int.forward,
-            Direction.backwards => Vector3Int.back,
-            _ => throw new Exception("Invalid input direction")
-        };
-    }
-}
-
-===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\DirectionExtensions.cs =====
-
-===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\GameOfLife3D.cs =====
-using UnityEngine;
-
-public class GameOfLife3D : MonoBehaviour
-{
-    [SerializeField] private int size = 10;
-    [SerializeField] private Vector2Int birthRange = new Vector2Int(9, 10);
-    [SerializeField] private Vector2Int deathRange = new Vector2Int(6, 11);
-    [SerializeField] private bool manualUpdateClick = false;
-    [SerializeField] private bool manualUpdateHold = false;
-    [SerializeField] private float updateInterval = 1.0f;
-    [SerializeField][Range(0f, 1f)] private float saturationValue = 0.5f;
-
-    [SerializeField] private World world;
-
-
-    private float timer = 0f; // Timer to track update intervals
-
-
-    private bool[,,] stateA;
-    private bool[,,] stateB;
-    private bool useA = true; // Determines which state (A or B) is currently active
-
-    [ContextMenu("Reset")]
-    void Start()
-    {
-        stateA = new bool[size, size, size];
-        stateB = new bool[size, size, size];
-
-        // Initialize stateA with some pattern
-        InitializePattern();
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            Start();
-        }
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            saturationValue -= .05f;
-        }
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            saturationValue += .05f;
-        }
-        
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            manualUpdateClick = !manualUpdateClick;
-            manualUpdateHold = !manualUpdateClick;
-        }
-        if (Input.GetKeyDown(KeyCode.N))
-        {
-            manualUpdateClick = false; manualUpdateHold = false;
-        }
-
-        if (manualUpdateClick)
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                PerformUpdate();
-            }
-        }
-        else if (manualUpdateHold)
-        {
-            timer += Time.deltaTime;
-            if (Input.GetKey(KeyCode.Space) && timer >= updateInterval)
-            {
-                PerformUpdate();
-                timer = 0f;
-            }
-        }
-        else
-        {
-            timer += Time.deltaTime;
-            if (timer >= updateInterval)
-            {
-                PerformUpdate();
-                timer = 0f; // Reset timer after an update
-            }
-        }
-    }
-
-
-    void PerformUpdate()
-    {
-        if (useA)
-        {
-            UpdateState(stateA, stateB);
-            world.GenerateWorld(stateA);
-        }
-        else
-        {
-            UpdateState(stateB, stateA);
-            world.GenerateWorld(stateB);
-        }
-
-        useA = !useA; // Swap which array is active
-    }
-
-    void InitializePattern()
-    {
-        for (int x = 0; x < size; x++)
-        {
-            for (int y = 0; y < size; y++)
-            {
-                for (int z = 0; z < size; z++)
-                {
-                    // Randomly set each cell to be alive or dead
-                    stateA[x, y, z] = Random.value < saturationValue;
-                }
-            }
-        }
-        world.GenerateWorld(stateA);
-    }
-
-
-    void UpdateState(bool[,,] current, bool[,,] next)
-    {
-        for (int x = 0; x < size; x++)
-        {
-            for (int y = 0; y < size; y++)
-            {
-                for (int z = 0; z < size; z++)
-                {
-                    int neighbors = CountNeighbors(x, y, z, current);
-
-                    // Apply birth and death ranges
-                    if (!current[x, y, z] && neighbors >= birthRange.x && neighbors <= birthRange.y)
-                        next[x, y, z] = true;
-                    else if (current[x, y, z] && (neighbors <= deathRange.x || neighbors >= deathRange.y))
-                        next[x, y, z] = false;
-                    else
-                        next[x, y, z] = current[x, y, z];
-                }
-            }
-        }
-    }
-
-    int CountNeighbors(int x, int y, int z, bool[,,] state)
-    {
-        int count = 0;
-        for (int i = -1; i <= 1; i++)
-        {
-            for (int j = -1; j <= 1; j++)
-            {
-                for (int k = -1; k <= 1; k++)
-                {
-                    if (i == 0 && j == 0 && k == 0) continue; // Skip the cell itself
-
-                    int nx = x + i;
-                    int ny = y + j;
-                    int nz = z + k;
-
-                    
-                    if (nx < 0 || ny < 0 || nz < 0 || nx >= size || ny >= size || nz >= size) { 
-                        //count += 1;
-                    }
-                    else if (state[nx, ny, nz])
-                        count += 1;
-                }
-            }
-        }
-        return count;
-    }
-}
-
-===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\GameOfLife3D.cs =====
-
-===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\MeshData.cs =====
-using System.Collections.Generic;
-using UnityEngine;
-
-public class MeshData
-{
-    public List<Vector3> vertices = new();
-    public List<int> triangles = new();
-    public List<Vector2> uv = new();
-
-    public List<Vector3> colliderVertices = new();
-    public List<int> colliderTriangles = new();
-
-
-    public MeshData()
-    {
-
-    }
-
-    public void AddVertex(Vector3 vertex)
-    {
-        vertices.Add(vertex);
-        colliderVertices.Add(vertex);
-    }
-
-    public void AddQuadTriangles()
-    {
-        triangles.Add(vertices.Count - 4);
-        triangles.Add(vertices.Count - 3);
-        triangles.Add(vertices.Count - 2);
-
-        triangles.Add(vertices.Count - 4);
-        triangles.Add(vertices.Count - 2);
-        triangles.Add(vertices.Count - 1);
-
-        colliderTriangles.Add(colliderVertices.Count - 4);
-        colliderTriangles.Add(colliderVertices.Count - 3);
-        colliderTriangles.Add(colliderVertices.Count - 2);
-
-        colliderTriangles.Add(colliderVertices.Count - 4);
-        colliderTriangles.Add(colliderVertices.Count - 2);
-        colliderTriangles.Add(colliderVertices.Count - 1);
-
-
-    }
-}
-
-===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\MeshData.cs =====
-
-===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxelizer.cs =====
-using UnityEngine;
-
-public class Voxelizer : MonoBehaviour
-{
-    public GameObject targetObject;
-    public int sizeLongestAxis = 100; // Size for the longest axis in the voxel grid
-    private Vector3Int arrayDimensions;
-    private bool[,,] voxelGrid;
-
-    [SerializeField] private World world;
-
-    [SerializeField] private bool autoSize;
-
-    [ContextMenu("Reset")]
-    void Start()
-    {
-        if (targetObject != null)
-        {
-            VoxelizeObject(targetObject);
-            world.GenerateWorld(voxelGrid);
-        }
-    }
-
-    void VoxelizeObject(GameObject obj)
-    {
-        Bounds bounds = CalculateBounds(obj);
-        CalculateArrayDimensions(bounds);
-        voxelGrid = new bool[arrayDimensions.x, arrayDimensions.y, arrayDimensions.z];
-        FillVoxelGrid(bounds);
-    }
-
-    Bounds CalculateBounds(GameObject obj)
-    {
-        var renderers = obj.GetComponentsInChildren<Renderer>();
-        Bounds bounds = new Bounds(obj.transform.position, Vector3.zero);
-        foreach (var renderer in renderers)
-        {
-            bounds.Encapsulate(renderer.bounds);
-        }
-        return bounds;
-    }
-
-    void CalculateArrayDimensions(Bounds bounds)
-    {
-        float longestSide = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
-        float xRatio = bounds.size.x / longestSide;
-        float yRatio = bounds.size.y / longestSide;
-        float zRatio = bounds.size.z / longestSide;
-
-        if (autoSize)
-            sizeLongestAxis = Mathf.CeilToInt(longestSide);
-        arrayDimensions = new Vector3Int(
-            Mathf.CeilToInt(sizeLongestAxis * xRatio),
-            Mathf.CeilToInt(sizeLongestAxis * yRatio),
-            Mathf.CeilToInt(sizeLongestAxis * zRatio));
-    }
-
-    void FillVoxelGrid(Bounds bounds)
-    {
-        Vector3 voxelSize = new Vector3(bounds.size.x / arrayDimensions.x, bounds.size.y / arrayDimensions.y, bounds.size.z / arrayDimensions.z);
-        for (int x = 0; x < arrayDimensions.x; x++)
-        {
-            for (int y = 0; y < arrayDimensions.y; y++)
-            {
-                for (int z = 0; z < arrayDimensions.z; z++)
-                {
-                    Vector3 center = bounds.min + new Vector3(voxelSize.x * (x + 0.5f), voxelSize.y * (y + 0.5f), voxelSize.z * (z + 0.5f));
-                    bool occupied = Physics.CheckBox(center, voxelSize * 0.5f, Quaternion.identity);
-                    voxelGrid[x, y, z] = occupied;
-                }
-            }
-        }
-    }
-}
-
-===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxelizer.cs =====
-
-===== Start of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\World.cs =====
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UIElements;
-
-public class World : MonoBehaviour
-{
-    public int mapSizeInChunks = 6;
-    public int chunkSize = 16, chunkHeight = 100;
-    public float noiseScale = 0.03f;
-    public GameObject chunkPrefab;
-    [SerializeField] private bool renderDown;
-
-    Dictionary<Vector3Int, ChunkData> chunkDataDictionary = new Dictionary<Vector3Int, ChunkData>();
-    Dictionary<Vector3Int, ChunkRenderer> chunkDictionary = new Dictionary<Vector3Int, ChunkRenderer>();
-
-    private void Awake()
-    {
-        BlockHelper.RenderDown = renderDown;
-    }
-
-    [ContextMenu("Generate New World")]
-    public void GenerateWorld()
-    {
-        ClearWorld();
-
-        for (int x = 0; x < mapSizeInChunks; x++)
-        {
-            for (int z = 0; z < mapSizeInChunks; z++)
-            {
-
-                ChunkData data = new ChunkData(chunkSize, chunkHeight, this, new Vector3Int(x * chunkSize, 0, z * chunkSize));
-                GenerateVoxels(data);
-                chunkDataDictionary.Add(data.worldPosition, data);
-            }
-        }
-
-        foreach (ChunkData data in chunkDataDictionary.Values)
-        {
-            MeshData meshData = Chunk.GetChunkMeshData(data);
-            GameObject chunkObject = Instantiate(chunkPrefab, data.worldPosition, Quaternion.identity);
-            ChunkRenderer chunkRenderer = chunkObject.GetComponent<ChunkRenderer>();
-            chunkDictionary.Add(data.worldPosition, chunkRenderer);
-            chunkRenderer.InitializeChunk(data);
-            chunkRenderer.UpdateChunk(meshData);
-
-        }
-    }
-
-    public void GenerateWorld(bool[,,] worldArray)
-    {
-        ClearWorld();
-
-        int lengthX = worldArray.GetLength(0);
-        int lengthY = worldArray.GetLength(1);
-        int lengthZ = worldArray.GetLength(2);
-        int chunkCountX = lengthX / chunkSize;
-        int chunksY = lengthY;
-        int chunkCountZ = lengthZ / chunkSize;
-
-        for (int x = 0; x <= chunkCountX; x++)
-        {
-            for (int z = 0; z <= chunkCountZ; z++)
-            {
-                Vector3Int chunkPosition = new Vector3Int(x * chunkSize, 0, z * chunkSize);
-                ChunkData chunkData = new ChunkData(chunkSize, chunksY, this, chunkPosition);
-                bool[,,] chunkArray = ExtractChunkArray(worldArray, x, z, chunkSize, chunksY, lengthX, lengthY, lengthZ);
-                GenerateVoxelsFrom3DBoolArray(chunkData, chunkArray);
-                CreateAndRegisterChunk(chunkData);
-            }
-        }
-    }
-
-
-    public void GenerateWorld(bool[,] worldArray)
-    {
-        ClearWorld(); 
-
-        int chunkCountX = worldArray.GetLength(0) / chunkSize;
-        int chunkCountZ = worldArray.GetLength(1) / chunkSize;
-
-        for (int x = 0; x < chunkCountX; x++)
-        {
-            for (int z = 0; z < chunkCountZ; z++)
-            {
-                Vector3Int chunkPosition = new Vector3Int(x * chunkSize, 0, z * chunkSize);
-                ChunkData chunkData = new ChunkData(chunkSize, chunkHeight, this, chunkPosition);
-                GenerateVoxelsFrom2DBoolArray(chunkData, worldArray); 
-                CreateAndRegisterChunk(chunkData);
-            }
-        }
-    }
-
-
-
-    private void ClearWorld()
-    {
-        chunkDataDictionary.Clear();
-        foreach (ChunkRenderer chunk in chunkDictionary.Values)
-        {
-            Destroy(chunk.gameObject);
-        }
-        chunkDictionary.Clear();
-    }
-
-    private void GenerateVoxels(ChunkData data)
-    {
-        for (int x = 0; x < data.chunkSize; x++)
-        {
-            for (int z = 0; z < data.chunkSize; z++)
-            {
-                float noiseValue = Mathf.PerlinNoise((data.worldPosition.x + x) * noiseScale, (data.worldPosition.z + z) * noiseScale);
-                int groundPosition = Mathf.RoundToInt(noiseValue * chunkHeight);
-                for (int y = 0; y < chunkHeight; y++)
-                {
-                    BlockType voxelType = BlockType.Wall;
-                    if (y > groundPosition)
-                    {
-                        voxelType = BlockType.Air;
-                    }
-                    else if (y == groundPosition)
-                    {
-                        voxelType = BlockType.Ground;
-                    }
-
-                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
-                }
-            }
-        }
-    }
-
-
-
-    private void GenerateVoxelsFrom3DBoolArray(ChunkData data, bool[,,] preMadeArray)
-    {
-        for (int x = 0; x < data.chunkSize; x++)
-        {
-            for (int y = 0; y < data.chunkHeight; y++)
-            {
-                for (int z = 0; z < data.chunkSize; z++)
-                {
-                    BlockType voxelType = preMadeArray[x, y, z] ? BlockType.Wall : BlockType.Air;
-                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
-                }
-            }
-        }
-    }
-
-    private void GenerateVoxelsFrom2DBoolArray(ChunkData data, bool[,] preMadeArray)
-    {
-        for (int x = 0; x < data.chunkSize; x++)
-        {
-            for (int y = 0; y < data.chunkHeight; y++)
-            {
-                for (int z = 0; z < chunkHeight; z++)
-                {
-                    BlockType voxelType = preMadeArray[x, y] ? BlockType.Wall : BlockType.Air;
-                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
-                }
-            }
-        }
-    }
-
-
-    internal BlockType GetBlockFromChunkCoordinates(int x, int y, int z)
-    {
-        Vector3Int pos = Chunk.ChunkPositionFromBlockCoords(this, x, y, z);
-        ChunkData containerChunk;
-
-        chunkDataDictionary.TryGetValue(pos, out containerChunk);
-
-        if (containerChunk == null)
-            return BlockType.Nothing;
-        Vector3Int blockInCHunkCoordinates = Chunk.GetBlockInChunkCoordinates(containerChunk, new Vector3Int(x, y, z));
-        return Chunk.GetBlockFromChunkCoordinates(containerChunk, blockInCHunkCoordinates);
-    }
-
-    private void CreateAndRegisterChunk(ChunkData chunkData)
-    {
-        GameObject chunkObject = Instantiate(chunkPrefab, chunkData.worldPosition, Quaternion.identity);
-        ChunkRenderer chunkRenderer = chunkObject.GetComponent<ChunkRenderer>();
-        chunkRenderer.InitializeChunk(chunkData);
-        chunkRenderer.UpdateChunk();
-        chunkDataDictionary.Add(chunkData.worldPosition, chunkData);
-        chunkDictionary.Add(chunkData.worldPosition, chunkRenderer);
-    }
-
-    private bool[,,] ExtractChunkArray(bool[,,] worldArray, int chunkX, int chunkZ, int chunkSize, int chunkHeight, int lengthX, int lengthY, int lengthZ)
-    {
-        // Calculate the start indices for X, Y, and Z dimensions.
-        int startX = chunkX * chunkSize;
-        int startY = 0; // Assuming Y starts from 0 for every chunk.
-        int startZ = chunkZ * chunkSize;
-        
-
-        // Initialize the new array for the chunk.
-        bool[,,] chunkArray = new bool[chunkSize, chunkHeight, chunkSize];
-
-        // Iterate over each dimension and copy the values.
-        for (int x = 0; x < chunkSize; x++)
-        {
-            for (int y = 0; y < chunkHeight; y++)
-            {
-                for (int z = 0; z < chunkSize; z++)
-                {
-                    // Ensure we don't exceed the worldArray's bounds.
-                    if ((startX + x) < lengthX && (startY + y) < lengthY && (startZ + z) < lengthZ)
-                    {
-                        chunkArray[x, y, z] = worldArray[startX + x, startY + y, startZ + z];
-                    }
-                    else
-                    {
-                        // Optionally handle out-of-bounds with a default value, e.g., false for no block.
-                        chunkArray[x, y, z] = false;
-                    }
-                }
-            }
-        }
-
-        return chunkArray;
-    }
-
-
-}
-===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\World.cs =====
+===== End of C:\Users\ossia\Documents\Unity Projects\VoxelGenerator\Assets\Scripts\Voxel generator\Chunks\ChunkRenderer.cs =====
 

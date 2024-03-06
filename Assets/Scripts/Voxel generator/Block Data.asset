@@ -16,8 +16,8 @@ MonoBehaviour:
   textureSizeY: 0.5
   textureDataList:
   - blockType: 3
-    up: {x: 0, y: 0}
+    up: {x: 2, y: 0}
     side: {x: 0, y: 0}
   - blockType: 2
-    up: {x: 2, y: 0}
+    up: {x: 0, y: 0}
     side: {x: 0, y: 0}
