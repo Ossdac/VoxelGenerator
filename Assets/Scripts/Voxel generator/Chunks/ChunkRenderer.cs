@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,9 +8,9 @@ using UnityEngine;
 [RequireComponent(typeof(MeshCollider))]
 public class ChunkRenderer : MonoBehaviour
 {
-    [SerializeField]MeshFilter meshFilter;
-    [SerializeField] MeshCollider meshCollider;
-    [SerializeField] Mesh mesh;
+    MeshFilter meshFilter;
+    MeshCollider meshCollider;
+    Mesh mesh;
     public bool showGizmo = false;
 
     public ChunkData ChunkData { get; private set; }
@@ -49,7 +48,6 @@ public class ChunkRenderer : MonoBehaviour
         Mesh collisionMesh = new();
         collisionMesh.vertices = meshData.colliderVertices.ToArray();
         collisionMesh.triangles = meshData.colliderTriangles.ToArray();
-        collisionMesh.RecalculateNormals();
 
         meshCollider.sharedMesh = collisionMesh;
     }
@@ -74,12 +72,14 @@ public class ChunkRenderer : MonoBehaviour
                 if (Selection.activeObject == gameObject)
                     Gizmos.color = new Color(0, 1, 0, 0.4f);
                 else
-                    Gizmos.color = new Color(1, 0, 1, 0.4f);
+                    Gizmos.color = new Color(1, 0, 1, 0);
 
                 int chunkSize = ChunkData.chunkSize;
                 int chunkHeight = ChunkData.chunkHeight;
 
-                Gizmos.DrawCube(transform.position + new Vector3(chunkSize / 2f, chunkHeight / 2f, chunkSize / 2f), new Vector3(chunkSize, chunkHeight, chunkSize));
+                Gizmos.DrawCube(transform.position + 
+                    new Vector3((chunkSize / 2f) - .5f, (chunkHeight / 2f) - .5f, (chunkSize / 2f) - .5f), 
+                    new Vector3(chunkSize, chunkHeight, chunkSize));
             }
         }
     }

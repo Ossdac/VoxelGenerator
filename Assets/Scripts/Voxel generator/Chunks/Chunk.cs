@@ -23,7 +23,6 @@ public static class Chunk
         return new Vector3Int(x, y, z);
     }
 
-    //in chunk coordinate system
     private static bool InRange(ChunkData chunkData, int axisCoordinate)
     {
         if (axisCoordinate < 0 || axisCoordinate >= chunkData.chunkSize)
@@ -32,7 +31,6 @@ public static class Chunk
         return true;
     }
 
-    //in chunk coordinate system
     private static bool InRangeHeight(ChunkData chunkData, int ycoordinate)
     {
         if (ycoordinate < 0 || ycoordinate >= chunkData.chunkHeight)

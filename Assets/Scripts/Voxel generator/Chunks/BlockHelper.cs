@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public static class BlockHelper
@@ -103,17 +101,17 @@ public static class BlockHelper
         Vector2[] UVs = new Vector2[4];
         var tilePos = TexturePosition(direction, blockType);
 
-        UVs[0] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.tileSizeX - BlockDataManager.textureOffset,
-            BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.textureOffset);
+        UVs[0] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.tileSizeX,
+            BlockDataManager.tileSizeY * tilePos.y);
 
-        UVs[1] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.tileSizeX - BlockDataManager.textureOffset,
-            BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.tileSizeY - BlockDataManager.textureOffset);
+        UVs[1] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.tileSizeX,
+            BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.tileSizeY);
 
-        UVs[2] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.textureOffset,
-            BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.tileSizeY - BlockDataManager.textureOffset);
+        UVs[2] = new Vector2(BlockDataManager.tileSizeX * tilePos.x,
+            BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.tileSizeY);
 
-        UVs[3] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.textureOffset,
-            BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.textureOffset);
+        UVs[3] = new Vector2(BlockDataManager.tileSizeX * tilePos.x,
+            BlockDataManager.tileSizeY * tilePos.y);
 
         return UVs;
     }

@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 984e17a8ed8056f4e96977e569f6512d, type: 3}
   m_Name: Block Data
   m_EditorClassIdentifier: Assembly-CSharp::BlockDataSO
-  textureSizeX: 0.33333334
-  textureSizeY: 0.5
+  textureSizeX: 18
+  textureSizeY: 3
   textureDataList:
   - blockType: 3
-    up: {x: 2, y: 0}
-    side: {x: 0, y: 0}
+    up: {x: 13, y: 1}
+    side: {x: 7, y: 1}
   - blockType: 2
-    up: {x: 0, y: 0}
-    side: {x: 0, y: 0}
+    up: {x: 0, y: 1}
+    side: {x: 4, y: 1}

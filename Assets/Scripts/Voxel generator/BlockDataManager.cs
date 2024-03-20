@@ -4,21 +4,20 @@ using UnityEngine;
 
 public class BlockDataManager : MonoBehaviour
 {
-    public static float textureOffset = 0.00f;
     public static float tileSizeX, tileSizeY;
     public static Dictionary<BlockType, TextureData> blockTextureDataDictionary = new();
     public BlockDataSO textureData;
 
     private void Awake()
     {
-        foreach (var item in textureData.textureDataList)
+        foreach (TextureData item in textureData.textureDataList)
         {
             if (blockTextureDataDictionary.ContainsKey(item.blockType) == false)
             {
                 blockTextureDataDictionary.Add(item.blockType, item);
             };
         }
-        tileSizeX = textureData.textureSizeX;
-        tileSizeY = textureData.textureSizeY;
+        tileSizeX = 1f / textureData.textureSizeX;
+        tileSizeY = 1f / textureData.textureSizeY;
     }
 }

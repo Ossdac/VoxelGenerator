@@ -11,11 +11,6 @@ public class MeshData
     public List<int> colliderTriangles = new();
 
 
-    public MeshData()
-    {
-
-    }
-
     public void AddVertex(Vector3 vertex)
     {
         vertices.Add(vertex);
