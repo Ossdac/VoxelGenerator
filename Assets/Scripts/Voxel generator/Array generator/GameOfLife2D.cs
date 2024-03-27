@@ -2,18 +2,9 @@ using UnityEngine;
 
 public class GameOfLife2D : GameOfLife 
 {
-
-
     private bool[,] stateA;
     private bool[,] stateB;
     private bool useA = true;
-
-    private void Start()
-    {
-        stateA = new bool[size,size];
-        stateB = new bool[size,size];
-    }
-
 
     override
     public void CustomUpdateState()
@@ -36,6 +27,8 @@ public class GameOfLife2D : GameOfLife
     override
     public void InitializePattern()
     {
+        stateA = new bool[size, size];
+        stateB = new bool[size, size];
         for (int x = 0; x < size; x++)
         {
             for (int y = 0; y < size; y++)

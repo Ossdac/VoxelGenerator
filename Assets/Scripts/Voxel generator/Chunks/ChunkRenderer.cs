@@ -33,7 +33,7 @@ public class ChunkRenderer : MonoBehaviour
         ChunkData = data;
     }
 
-    private void RenderMesh(MeshData meshData)
+    public void RenderMesh(MeshData meshData)
     {
         mesh.Clear();
 

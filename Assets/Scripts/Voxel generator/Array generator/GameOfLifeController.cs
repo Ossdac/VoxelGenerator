@@ -39,6 +39,8 @@ public class GameOfLifeController : MonoBehaviour
     [ContextMenu("Reset")]
     private void Reset()
     {
+        gameIndex = gameIndex  % gamesOfLife.Length;
+        currentGame = gamesOfLife[gameIndex];
         currentGame.InitializePattern();
         currentGame.RenderWorld();
     }

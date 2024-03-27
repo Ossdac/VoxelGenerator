@@ -198,9 +198,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetObject: {fileID: 5145476182278728371, guid: 7fce13f41cfd71746b1cdc569588f92d, type: 3}
-  sizeLongestAxis: 1000
+  sizeLongestAxis: 50
   world: {fileID: 1645809947}
-  autoSize: 1
+  autoSize: 0
 --- !u!4 &182773098
 Transform:
   m_ObjectHideFlags: 0
@@ -352,7 +352,7 @@ MonoBehaviour:
   updateInterval: 1
   manualUpdateClick: 1
   manualUpdateHold: 0
-  gameIndex: 3
+  gameIndex: 2
 --- !u!4 &724223514
 Transform:
   m_ObjectHideFlags: 0
@@ -420,7 +420,7 @@ MonoBehaviour:
   world: {fileID: 1645809947}
   size: 50
   birthRange: {x: 3, y: 3}
-  deathRange: {x: 1, y: 4}
+  deathRange: {x: 1, y: 9}
   saturationValue: 0.5
 --- !u!114 &724223518
 MonoBehaviour:
@@ -528,13 +528,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 25.94, y: 26.66, z: -81.6}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: -174.4, y: 91, z: 1250}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!114 &963194229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -585,10 +585,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapSizeInChunks: 50
-  chunkSize: 10
+  chunkSize: 50
   chunkHeight: 100
-  noiseScale: 0.03
+  noiseScale: 0.02
   chunkPrefab: {fileID: 2543376799029590482, guid: d7a69a4bbab32f848a12842a0a7e247b, type: 3}
+  renderNothing: 0
   renderDown: 0
 --- !u!4 &1645809948
 Transform:

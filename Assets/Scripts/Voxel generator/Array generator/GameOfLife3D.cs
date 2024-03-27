@@ -10,11 +10,7 @@ public class GameOfLife3D : GameOfLife
     [SerializeField ] private bool topFill;
     [SerializeField ] private bool diagonalsFill;
 
-    void Start()
-    {
-        stateA = new bool[size, size, size];
-        stateB = new bool[size, size, size];
-    }
+ 
 
     override
     public void CustomUpdateState()
@@ -36,6 +32,8 @@ public class GameOfLife3D : GameOfLife
     override
     public void InitializePattern()
     {
+        stateA = new bool[size, size, size];
+        stateB = new bool[size, size, size];
         useA = true;
         stateA = new bool[size, size, size];
         bool totalFill = true;

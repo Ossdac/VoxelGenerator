@@ -17,11 +17,6 @@ public class GameOfLifePerlin : GameOfLife
     private float offsetY = 0;
 
 
-    private void Start()
-    {
-        stateA = new float[size, size];
-        stateB = new float[size, size];
-    }
 
     override
     public void CustomUpdateState()
@@ -44,6 +39,8 @@ public class GameOfLifePerlin : GameOfLife
     override
     public void InitializePattern()
     {
+        stateA = new float[size, size];
+        stateB = new float[size, size];
         for (int x = 0; x < size; x++)
         {
             for (int y = 0; y < size; y++)

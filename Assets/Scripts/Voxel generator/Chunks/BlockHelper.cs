@@ -3,9 +3,11 @@ using UnityEngine;
 public static class BlockHelper
 {
 
+    private static bool renderNothing;
     private static bool renderDown;
 
-    public static bool RenderDown {set { renderDown = value;}}
+    public static bool RenderNothing {set { renderNothing = value;}}
+    public static bool RenderDown { set { renderDown = value; } }
 
     private static readonly Direction[] directions =
     {
@@ -17,30 +19,32 @@ public static class BlockHelper
         Direction.up
     };
 
-    public static MeshData GetMeshData
-        (ChunkData chunk, int x, int y, int z, MeshData meshData, BlockType blockType)
+    public static MeshData GetMeshData(ChunkData chunk, int x, int y, int z, MeshData meshData, BlockType blockType)
     {
      
         if (blockType == BlockType.Nothing || blockType == BlockType.Air)
             return meshData;
+
+
 
         foreach (Direction direction in directions)
         {
             var neighbourBlockCoordinates = new Vector3Int(x, y, z) + direction.GetVector();
             var neighbourBlockType = Chunk.GetBlockFromChunkCoordinates(chunk, neighbourBlockCoordinates);
 
-            if (neighbourBlockType == BlockType.Air || neighbourBlockType == BlockType.Nothing  &&  (direction == Direction.up || renderDown))
+            if (neighbourBlockType == BlockType.Air || neighbourBlockType == BlockType.Nothing && renderNothing &&
+                (renderDown || !direction.Equals(Direction.down)))
             {
 
-                    meshData = GetFaceDataIn(direction, x, y, z, meshData, blockType);
-                
+                    meshData = GetFaceDataIn(direction, x, y, z, meshData, blockType);                
             }
         }
 
         return meshData;
     }
 
-    public static MeshData GetFaceDataIn(Direction direction, int x, int y, int z, MeshData meshData, BlockType blockType)
+    public static MeshData GetFaceDataIn(Direction direction,
+        int x, int y, int z, MeshData meshData, BlockType blockType)
     {
         GetFaceVertices(direction, x, y, z, meshData);
         meshData.AddQuadTriangles();

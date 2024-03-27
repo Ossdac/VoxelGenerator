@@ -10,6 +10,7 @@ public class World : MonoBehaviour
     public int chunkSize = 16, chunkHeight = 100;
     public float noiseScale = 0.03f;
     public GameObject chunkPrefab;
+    [SerializeField] private bool renderNothing;
     [SerializeField] private bool renderDown;
 
     Dictionary<Vector3Int, ChunkData> chunkDataDictionary = new Dictionary<Vector3Int, ChunkData>();
@@ -17,7 +18,7 @@ public class World : MonoBehaviour
 
     private void Awake()
     {
-        BlockHelper.RenderDown = renderDown;
+        BlockHelper.RenderNothing = renderNothing;
     }
 
     [ContextMenu("Generate New World")]
@@ -29,22 +30,42 @@ public class World : MonoBehaviour
         {
             for (int z = 0; z < mapSizeInChunks; z++)
             {
-
-                ChunkData data = new ChunkData(chunkSize, chunkHeight, this, new Vector3Int(x * chunkSize, 0, z * chunkSize));
-                GenerateVoxels(data);
-                chunkDataDictionary.Add(data.worldPosition, data);
+                ChunkData chunkData = new ChunkData(chunkSize, chunkHeight, 
+                    this, new Vector3Int(x * chunkSize, 0, z * chunkSize));
+                GenerateVoxels(chunkData);
+                chunkDataDictionary.Add(chunkData.worldPosition, chunkData);
             }
         }
 
-        foreach (ChunkData data in chunkDataDictionary.Values)
+        foreach (ChunkData chunkData in chunkDataDictionary.Values)
         {
-            MeshData meshData = Chunk.GetChunkMeshData(data);
-            GameObject chunkObject = Instantiate(chunkPrefab, data.worldPosition, Quaternion.identity);
-            ChunkRenderer chunkRenderer = chunkObject.GetComponent<ChunkRenderer>();
-            chunkDictionary.Add(data.worldPosition, chunkRenderer);
-            chunkRenderer.InitializeChunk(data);
-            chunkRenderer.UpdateChunk(meshData);
+            RenderChunk(chunkData);
+        }
+    }
 
+    public void GenerateWorld(bool[,] worldArray)
+    {
+        ClearWorld();
+
+        int lengthX = worldArray.GetLength(0);
+        int lengthZ = worldArray.GetLength(1);
+        int chunkCountX = Mathf.CeilToInt((float)lengthX / chunkSize);
+        int chunkCountZ = Mathf.CeilToInt((float)lengthZ / chunkSize);
+
+        for (int x = 0; x < chunkCountX; x++)
+        {
+            for (int z = 0; z < chunkCountZ; z++)
+            {
+                Vector3Int chunkPosition = new Vector3Int(x * chunkSize, 0, z * chunkSize);
+                ChunkData chunkData = new ChunkData(chunkSize, chunkHeight, this, chunkPosition);
+                bool[,] chunkArray = ExtractChunkArray(worldArray, x, z, chunkSize, lengthX, lengthZ);
+                GenerateVoxelsFrom2DBoolArray(chunkData, chunkArray);
+                chunkDataDictionary.Add(chunkData.worldPosition, chunkData);
+            }
+        }
+        foreach (ChunkData chunkData in chunkDataDictionary.Values)
+        {
+            RenderChunk(chunkData);
         }
     }
 
@@ -69,33 +90,17 @@ public class World : MonoBehaviour
                 ChunkData chunkData = new ChunkData(chunkSize, chunksY, this, chunkPosition);
                 bool[,,] chunkArray = ExtractChunkArray(worldArray, x, z, chunkSize, chunksY, lengthX, lengthY, lengthZ);
                 GenerateVoxelsFrom3DBoolArray(chunkData, chunkArray);
-                CreateAndRegisterChunk(chunkData);
+                chunkDataDictionary.Add(chunkData.worldPosition, chunkData);
             }
         }
-    }
-
-
-    public void GenerateWorld(bool[,] worldArray)
-    {
-        ClearWorld();
-
-        int lengthX = worldArray.GetLength(0);
-        int lengthZ = worldArray.GetLength(1);
-        int chunkCountX = Mathf.CeilToInt((float)lengthX / chunkSize);
-        int chunkCountZ = Mathf.CeilToInt((float)lengthZ / chunkSize);
-
-        for (int x = 0; x < chunkCountX; x++)
+        foreach (ChunkData chunkData in chunkDataDictionary.Values)
         {
-            for (int z = 0; z < chunkCountZ; z++)
-            {
-                Vector3Int chunkPosition = new Vector3Int(x * chunkSize, 0, z * chunkSize);
-                ChunkData chunkData = new ChunkData(chunkSize, chunkHeight, this, chunkPosition);
-                bool[,] chunkArray = ExtractChunkArray(worldArray, x, z, chunkSize, lengthX, lengthZ);
-                GenerateVoxelsFrom2DBoolArray(chunkData, chunkArray); 
-                CreateAndRegisterChunk(chunkData);
-            }
+            RenderChunk(chunkData);
         }
     }
+
+
+    
 
     public void GenerateWorld(int[,] worldArray)
     {
@@ -114,8 +119,12 @@ public class World : MonoBehaviour
                 ChunkData chunkData = new ChunkData(chunkSize, chunkHeight, this, chunkPosition);
                 int[,] chunkArray = ExtractChunkArray(worldArray, x, z, chunkSize, lengthX, lengthZ);
                 GenerateVoxelsFrom2DIntArray(chunkData, chunkArray);
-                CreateAndRegisterChunk(chunkData);
+                chunkDataDictionary.Add(chunkData.worldPosition, chunkData);
             }
+        }
+        foreach (ChunkData chunkData in chunkDataDictionary.Values)
+        {
+            RenderChunk(chunkData);
         }
     }
 
@@ -136,8 +145,12 @@ public class World : MonoBehaviour
                 ChunkData chunkData = new ChunkData(chunkSize, chunkHeight, this, chunkPosition);
                 float[,] chunkArray = ExtractChunkArray(worldArray, x, z, chunkSize, lengthX, lengthZ);
                 GenerateVoxelsFrom2DFloatArray(chunkData, chunkArray);
-                CreateAndRegisterChunk(chunkData);
+                chunkDataDictionary.Add(chunkData.worldPosition, chunkData);
             }
+        }
+        foreach (ChunkData chunkData in chunkDataDictionary.Values)
+        {
+            RenderChunk(chunkData);
         }
     }
 
@@ -151,6 +164,8 @@ public class World : MonoBehaviour
             Destroy(chunk.gameObject);
         }
         chunkDictionary.Clear();
+        BlockHelper.RenderNothing = renderNothing;
+        BlockHelper.RenderDown = renderDown;
     }
 
     private void GenerateVoxels(ChunkData data)
@@ -160,7 +175,8 @@ public class World : MonoBehaviour
         {
             for (int z = 0; z < chunkSize; z++)
             {
-                float noiseValue = Mathf.PerlinNoise((data.worldPosition.x + x) * noiseScale, (data.worldPosition.z + z) * noiseScale);
+                float noiseValue = Mathf.PerlinNoise((data.worldPosition.x + x) * 
+                    noiseScale, (data.worldPosition.z + z) * noiseScale);
                 int groundPosition = Mathf.RoundToInt(noiseValue * chunkHeight);
                 for (int y = 0; y < chunkHeight; y++)
                 {
@@ -173,25 +189,6 @@ public class World : MonoBehaviour
                     {
                         voxelType = BlockType.Ground;
                     }
-
-                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
-                }
-            }
-        }
-    }
-
-
-
-    private void GenerateVoxelsFrom3DBoolArray(ChunkData data, bool[,,] preMadeArray)
-    {
-        int chunkSize = data.chunkSize;
-        for (int x = 0; x < chunkSize; x++)
-        {
-            for (int y = 0; y < chunkHeight; y++)
-            {
-                for (int z = 0; z < chunkSize; z++)
-                {
-                    BlockType voxelType = preMadeArray[x, y, z] ? BlockType.Wall : BlockType.Air;
                     Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
                 }
             }
@@ -213,6 +210,24 @@ public class World : MonoBehaviour
             }
         }
     }
+
+    private void GenerateVoxelsFrom3DBoolArray(ChunkData data, bool[,,] preMadeArray)
+    {
+        int chunkSize = data.chunkSize;
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int y = 0; y < chunkHeight; y++)
+            {
+                for (int z = 0; z < chunkSize; z++)
+                {
+                    BlockType voxelType = preMadeArray[x, y, z] ? BlockType.Wall : BlockType.Air;
+                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
+                }
+            }
+        }
+    }
+
+    
     private void GenerateVoxelsFrom2DFloatArray(ChunkData data, float[,] preMadeArray)
     {
         int chunkSize = data.chunkSize;
@@ -221,20 +236,18 @@ public class World : MonoBehaviour
             for (int z = 0; z < chunkSize; z++)
             {
                 int groundPosition = Mathf.RoundToInt(preMadeArray[x,z] * chunkHeight);
-                BlockType voxelType = BlockType.Air;
-
-                for (int y = 0; y < groundPosition; y++)
+               
+                for (int y = 0; y < chunkHeight; y++)
                 {
-                    voxelType = BlockType.Wall;
-                    //if (y > groundPosition)
-                    //{
-                    //    voxelType = BlockType.Air;
-                    //}
-                    if (y == groundPosition - 1)
+                    BlockType voxelType = BlockType.Air;
+                    if (y < groundPosition)
+                    {
+                        voxelType = BlockType.Wall;
+                    }
+                     else if (groundPosition != 0 && y == groundPosition)
                     {
                         voxelType = BlockType.Ground;
                     }
-
                     Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
                 }
             }
@@ -248,10 +261,13 @@ public class World : MonoBehaviour
         {
             for (int z = 0; z < chunkSize; z++)
             {
-                BlockType voxelType = BlockType.Wall;
-                for (int y = 0; y < preMadeArray[x,z]; y++)
+                int groundPosition = preMadeArray[x, z];
+                BlockType voxelType = BlockType.Air;
+                for (int y = chunkHeight - 1; y >= 0; y--)
                 {
-                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
+                    if (groundPosition != 0 && y <= groundPosition)
+                        voxelType = BlockType.Wall;
+                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);                    
                 }
             }
         }
@@ -271,14 +287,14 @@ public class World : MonoBehaviour
         return Chunk.GetBlockFromChunkCoordinates(containerChunk, blockInCHunkCoordinates);
     }
 
-    private void CreateAndRegisterChunk(ChunkData chunkData)
+    private void RenderChunk(ChunkData chunkData)
     {
+        MeshData meshData = Chunk.GetChunkMeshData(chunkData);
         GameObject chunkObject = Instantiate(chunkPrefab, chunkData.worldPosition, Quaternion.identity);
         ChunkRenderer chunkRenderer = chunkObject.GetComponent<ChunkRenderer>();
-        chunkRenderer.InitializeChunk(chunkData);
-        chunkRenderer.UpdateChunk();
-        chunkDataDictionary.Add(chunkData.worldPosition, chunkData);
         chunkDictionary.Add(chunkData.worldPosition, chunkRenderer);
+        chunkRenderer.InitializeChunk(chunkData);
+        chunkRenderer.RenderMesh(meshData);
     }
 
     private bool[,,] ExtractChunkArray(bool[,,] worldArray, int chunkX, int chunkZ, int chunkSize, int chunkHeight, int lengthX, int lengthY, int lengthZ)
@@ -289,24 +305,20 @@ public class World : MonoBehaviour
         int startZ = chunkZ * chunkSize;
         
 
-        // Initialize the new array for the chunk.
         bool[,,] chunkArray = new bool[chunkSize, chunkHeight, chunkSize];
 
-        // Iterate over each dimension and copy the values.
         for (int x = 0; x < chunkSize; x++)
         {
             for (int y = 0; y < chunkHeight; y++)
             {
                 for (int z = 0; z < chunkSize; z++)
                 {
-                    // Ensure we don't exceed the worldArray's bounds.
                     if ((startX + x) < lengthX && (startY + y) < lengthY && (startZ + z) < lengthZ)
                     {
                         chunkArray[x, y, z] = worldArray[startX + x, startY + y, startZ + z];
                     }
                     else
                     {
-                        // Optionally handle out-of-bounds with a default value, e.g., false for no block.
                         chunkArray[x, y, z] = false;
                     }
                 }
