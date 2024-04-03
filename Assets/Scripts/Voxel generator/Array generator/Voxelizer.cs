@@ -1,10 +1,9 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Voxelizer : MonoBehaviour
 {
     public GameObject targetObject;
-    public int sizeLongestAxis = 100; // Size for the longest axis in the voxel grid
+    public int sizeLongestAxis = 100;
     private Vector3Int arrayDimensions;
     private bool[,,] voxelGrid;
 
@@ -12,15 +11,23 @@ public class Voxelizer : MonoBehaviour
 
     [SerializeField] private bool autoSize;
 
+    [SerializeField] private bool solid;
+
     [ContextMenu("Reset")]
     void Start()
     {
         if (targetObject != null)
         {
-            GameObject instantiatedObject = Instantiate(targetObject, transform.position, Quaternion.identity);
+            GameObject instantiatedObject =
+                Instantiate(targetObject,
+                transform.position,
+                Quaternion.identity);
 
             VoxelizeObject(instantiatedObject);
-            world.GenerateWorld(voxelGrid);
+            if (solid)
+                world.GenerateWorld(FillSpaces.Bool3D(voxelGrid));
+            else
+                world.GenerateWorld(voxelGrid);
 
             Destroy(instantiatedObject);
         }
@@ -30,7 +37,8 @@ public class Voxelizer : MonoBehaviour
     {
         Bounds bounds = CalculateBounds(obj);
         CalculateArrayDimensions(bounds);
-        voxelGrid = new bool[arrayDimensions.x, arrayDimensions.y, arrayDimensions.z];
+        voxelGrid = new bool[arrayDimensions.x,
+            arrayDimensions.y, arrayDimensions.z];
         FillVoxelGrid(bounds);
     }
 
@@ -47,7 +55,8 @@ public class Voxelizer : MonoBehaviour
 
     void CalculateArrayDimensions(Bounds bounds)
     {
-        float longestSide = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
+        float longestSide = Mathf.Max(bounds.size.x,
+            bounds.size.y, bounds.size.z);
         float xRatio = bounds.size.x / longestSide;
         float yRatio = bounds.size.y / longestSide;
         float zRatio = bounds.size.z / longestSide;
@@ -68,7 +77,10 @@ public class Voxelizer : MonoBehaviour
         float voxelSizeX = bounds.size.x / arrayDimensionsX;
         float voxelSizeY = bounds.size.y / arrayDimensionsY;
         float voxelSizeZ = bounds.size.z / arrayDimensionsZ;
-        Vector3 voxelSize = new Vector3(bounds.size.x / arrayDimensionsX, bounds.size.y / arrayDimensionsY, bounds.size.z / arrayDimensionsZ);
+        Vector3 voxelSize = new Vector3(
+            bounds.size.x / arrayDimensionsX,
+            bounds.size.y / arrayDimensionsY,
+            bounds.size.z / arrayDimensionsZ);
 
         for (int x = 0; x < arrayDimensionsX; x++)
         {
@@ -76,8 +88,12 @@ public class Voxelizer : MonoBehaviour
             {
                 for (int z = 0; z < arrayDimensionsZ; z++)
                 {
-                    Vector3 center = bounds.min + new Vector3(voxelSizeX * (x + 0.5f), voxelSizeY * (y + 0.5f), voxelSizeZ * (z + 0.5f));
-                    bool occupied = Physics.CheckBox(center, voxelSize * 0.5f, Quaternion.identity);
+                    Vector3 center = bounds.min + new Vector3(
+                        voxelSizeX * (x + 0.5f),
+                        voxelSizeY * (y + 0.5f),
+                        voxelSizeZ * (z + 0.5f));
+                    bool occupied = Physics.CheckBox(center,
+                        voxelSize * 0.5f, Quaternion.identity);
                     voxelGrid[x, y, z] = occupied;
                 }
             }

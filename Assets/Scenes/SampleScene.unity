@@ -184,7 +184,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &182773097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -200,7 +200,8 @@ MonoBehaviour:
   targetObject: {fileID: 5145476182278728371, guid: 7fce13f41cfd71746b1cdc569588f92d, type: 3}
   sizeLongestAxis: 50
   world: {fileID: 1645809947}
-  autoSize: 0
+  autoSize: 1
+  solid: 0
 --- !u!4 &182773098
 Transform:
   m_ObjectHideFlags: 0
@@ -555,6 +556,53 @@ MonoBehaviour:
     m_Bits: 4294967295
   sphereRadius: 0.35
   collisionOffset: 0.05
+--- !u!1 &1200219152
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1200219154}
+  - component: {fileID: 1200219153}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &1200219153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1200219152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d369f1b621ad36499694f835050a71e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chunks: []
+  prefabFolder: Dragons
+  prefabName: Dragon_auto_solid
+--- !u!4 &1200219154
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1200219152}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1645809946
 GameObject:
   m_ObjectHideFlags: 0
@@ -585,11 +633,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapSizeInChunks: 50
-  chunkSize: 50
-  chunkHeight: 100
+  chunkSize: 10
+  chunkHeight: 1
   noiseScale: 0.02
   chunkPrefab: {fileID: 2543376799029590482, guid: d7a69a4bbab32f848a12842a0a7e247b, type: 3}
-  renderNothing: 0
+  renderNothing: 1
   renderDown: 0
 --- !u!4 &1645809948
 Transform:
@@ -616,3 +664,4 @@ SceneRoots:
   - {fileID: 131377507}
   - {fileID: 182773098}
   - {fileID: 724223514}
+  - {fileID: 1200219154}

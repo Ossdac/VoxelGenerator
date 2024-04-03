@@ -76,19 +76,18 @@ public class World : MonoBehaviour
         int lengthX = worldArray.GetLength(0);
         int lengthY = worldArray.GetLength(1);
         int lengthZ = worldArray.GetLength(2);
-        int chunkCountX = lengthX / chunkSize;
-        int chunksY = lengthY;
-        int chunkCountZ = lengthZ / chunkSize;
+        int chunkCountX = Mathf.CeilToInt((float)lengthX / chunkSize);
+        int chunkCountZ = Mathf.CeilToInt((float)lengthZ / chunkSize);
 
-        chunkHeight = chunksY;
+        chunkHeight = lengthY;
 
-        for (int x = 0; x <= chunkCountX; x++)
+        for (int x = 0; x < chunkCountX; x++)
         {
-            for (int z = 0; z <= chunkCountZ; z++)
+            for (int z = 0; z < chunkCountZ; z++)
             {
                 Vector3Int chunkPosition = new Vector3Int(x * chunkSize, 0, z * chunkSize);
-                ChunkData chunkData = new ChunkData(chunkSize, chunksY, this, chunkPosition);
-                bool[,,] chunkArray = ExtractChunkArray(worldArray, x, z, chunkSize, chunksY, lengthX, lengthY, lengthZ);
+                ChunkData chunkData = new ChunkData(chunkSize, chunkHeight, this, chunkPosition);
+                bool[,,] chunkArray = ExtractChunkArray(worldArray, x, z, chunkSize, chunkHeight, lengthX, lengthY, lengthZ);
                 GenerateVoxelsFrom3DBoolArray(chunkData, chunkArray);
                 chunkDataDictionary.Add(chunkData.worldPosition, chunkData);
             }
@@ -297,7 +296,8 @@ public class World : MonoBehaviour
         chunkRenderer.RenderMesh(meshData);
     }
 
-    private bool[,,] ExtractChunkArray(bool[,,] worldArray, int chunkX, int chunkZ, int chunkSize, int chunkHeight, int lengthX, int lengthY, int lengthZ)
+    private bool[,,] ExtractChunkArray(bool[,,] worldArray, int chunkX, int chunkZ, 
+        int chunkSize, int chunkHeight, int lengthX, int lengthY, int lengthZ)
     {
        
         int startX = chunkX * chunkSize;
@@ -324,8 +324,7 @@ public class World : MonoBehaviour
                 }
             }
         }
-
-        return chunkArray;
+                return chunkArray;
     }
 
     private bool[,] ExtractChunkArray(bool[,] worldArray, int chunkX, int chunkZ, int chunkSize, int lengthX, int lengthZ)

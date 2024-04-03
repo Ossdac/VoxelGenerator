@@ -103,19 +103,23 @@ public static class BlockHelper
     public static Vector2[] FaceUVs(Direction direction, BlockType blockType)
     {
         Vector2[] UVs = new Vector2[4];
-        var tilePos = TexturePosition(direction, blockType);
+        Vector2 tilePos = TexturePosition(direction, blockType);
+        float tilePosX = tilePos.x;
+        float tilePosY = tilePos.y;
+        float tileSizeX = BlockDataManager.tileSizeX;
+        float tileSizeY = BlockDataManager.tileSizeY;
 
-        UVs[0] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.tileSizeX,
-            BlockDataManager.tileSizeY * tilePos.y);
+        UVs[0] = new Vector2(tileSizeX * tilePosX + tileSizeX,
+            tileSizeY * tilePosY);
 
-        UVs[1] = new Vector2(BlockDataManager.tileSizeX * tilePos.x + BlockDataManager.tileSizeX,
-            BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.tileSizeY);
+        UVs[1] = new Vector2(tileSizeX * tilePosX + tileSizeX,
+            tileSizeY * tilePosY + tileSizeY);
 
-        UVs[2] = new Vector2(BlockDataManager.tileSizeX * tilePos.x,
-            BlockDataManager.tileSizeY * tilePos.y + BlockDataManager.tileSizeY);
+        UVs[2] = new Vector2(tileSizeX * tilePosX,
+            tileSizeY * tilePosY + tileSizeY);
 
-        UVs[3] = new Vector2(BlockDataManager.tileSizeX * tilePos.x,
-            BlockDataManager.tileSizeY * tilePos.y);
+        UVs[3] = new Vector2(tileSizeX * tilePosX,
+            tileSizeY * tilePosY);
 
         return UVs;
     }
