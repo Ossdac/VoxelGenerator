@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -74,12 +72,15 @@ public class ChunkRenderer : MonoBehaviour
                 else
                     Gizmos.color = new Color(1, 0, 1, 0);
 
-                int chunkSize = ChunkData.chunkSize;
-                int chunkHeight = ChunkData.chunkHeight;
+                Vector3 chunkSize = (Vector3)ChunkData.chunkSize;
+                Vector3 blockSize = ChunkData.blockSize;
+                float xPos = chunkSize.x * blockSize.x;
+                float yPos = chunkSize.y * blockSize.y;
+                float zPos = chunkSize.z * blockSize.z;
 
-                Gizmos.DrawCube(transform.position + 
-                    new Vector3((chunkSize / 2f) - .5f, (chunkHeight / 2f) - .5f, (chunkSize / 2f) - .5f), 
-                    new Vector3(chunkSize, chunkHeight, chunkSize));
+                Gizmos.DrawCube(transform.position +
+                    new Vector3((xPos / 2f) - (blockSize.x / 2), (yPos / 2f) - (blockSize.y /2), (zPos / 2f) - (blockSize.z / 2)),
+                    new Vector3(xPos, yPos, zPos));
             }
         }
     }

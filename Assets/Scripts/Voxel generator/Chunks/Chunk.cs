@@ -15,27 +15,22 @@ public static class Chunk
 
     private static Vector3Int GetPostitionFromIndex(ChunkData chunkData, int index)
     {
-        int chunkSize = chunkData.chunkSize;
-        int chunkHeight = chunkData.chunkHeight;
-        int x = index % chunkSize;
-        int y = (index /chunkSize) % chunkHeight;
-        int z = index / (chunkSize * chunkHeight);
+        Vector3Int chunkSize = chunkData.chunkSize;
+        
+        int x = index % chunkSize.x;
+        int y = (index /chunkSize.x) % chunkSize.y;
+        int z = index / (chunkSize.x * chunkSize.y);
         return new Vector3Int(x, y, z);
     }
 
-    private static bool InRange(ChunkData chunkData, int axisCoordinate)
+    private static bool InRange(ChunkData chunkData, Vector3 axisCoordinate)
     {
-        if (axisCoordinate < 0 || axisCoordinate >= chunkData.chunkSize)
+        Vector3Int chunkSize = chunkData.chunkSize;
+        if ((axisCoordinate.x < 0 || axisCoordinate.x >= chunkSize.x) &&
+            (axisCoordinate.y < 0 || axisCoordinate.y >= chunkSize.y) &&
+            (axisCoordinate.z < 0 || axisCoordinate.z >= chunkSize.z))
             return false;
 
-        return true;
-    }
-
-    private static bool InRangeHeight(ChunkData chunkData, int ycoordinate)
-    {
-        if (ycoordinate < 0 || ycoordinate >= chunkData.chunkHeight)
-            return false;
-        
         return true;
     }
 
@@ -46,7 +41,7 @@ public static class Chunk
 
     public static BlockType GetBlockFromChunkCoordinates(ChunkData chunkData, int x, int y, int z)
     {
-        if (InRange(chunkData, x) && InRangeHeight(chunkData, y) && InRange(chunkData, z))
+        if (InRange(chunkData, new Vector3Int(x, y, z)))
         {
             int index = GetIndexFromPosition(chunkData, x, y, z);
             return chunkData.blocks[index];
@@ -57,7 +52,7 @@ public static class Chunk
 
     public static void SetBlock(ChunkData chunkData, Vector3Int localPosition, BlockType block)
     {
-        if (InRange(chunkData, localPosition.x) && InRangeHeight(chunkData, localPosition.y) && InRange(chunkData, localPosition.z))
+        if (InRange(chunkData, localPosition))
         {
             int index = GetIndexFromPosition(chunkData, localPosition.x, localPosition.y, localPosition.z);
             chunkData.blocks[index] = block;
@@ -70,7 +65,7 @@ public static class Chunk
 
     private static int GetIndexFromPosition(ChunkData chunkData, int x, int y, int z)
     {
-        return x + chunkData.chunkSize * y + chunkData.chunkSize * chunkData.chunkHeight * z;
+        return x + chunkData.chunkSize.x * y + chunkData.chunkSize.x * chunkData.chunkSize.y * z;
     }
 
     public static Vector3Int GetBlockInChunkCoordinates(ChunkData chunkData, Vector3Int pos)

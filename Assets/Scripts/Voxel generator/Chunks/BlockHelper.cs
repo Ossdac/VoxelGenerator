@@ -36,7 +36,7 @@ public static class BlockHelper
                 (renderDown || !direction.Equals(Direction.down)))
             {
 
-                    meshData = GetFaceDataIn(direction, x, y, z, meshData, blockType);                
+                    meshData = GetFaceDataIn(direction, x, y, z, meshData, blockType, chunk);                
             }
         }
 
@@ -44,9 +44,9 @@ public static class BlockHelper
     }
 
     public static MeshData GetFaceDataIn(Direction direction,
-        int x, int y, int z, MeshData meshData, BlockType blockType)
+        int x, int y, int z, MeshData meshData, BlockType blockType, ChunkData chunkData)
     {
-        GetFaceVertices(direction, x, y, z, meshData);
+        GetFaceVertices(direction, x, y, z, meshData, chunkData);
         meshData.AddQuadTriangles();
         meshData.uv.AddRange(FaceUVs(direction, blockType));
 
@@ -54,46 +54,50 @@ public static class BlockHelper
         return meshData;
     }
 
-    public static void GetFaceVertices(Direction direction, int x, int y, int z, MeshData meshData)
+    public static void GetFaceVertices(Direction direction, int x, int y, int z, MeshData meshData, ChunkData chunkData)
     {
+        Vector3 blockSize = chunkData.blockSize;
+        float xCorner = blockSize.x / 2;
+        float yCorner = blockSize.y / 2;
+        float zCorner = blockSize.z / 2;
         switch (direction)
         {
             case Direction.backwards:
-                meshData.AddVertex(new Vector3(x - 0.5f, y - 0.5f, z - 0.5f));
-                meshData.AddVertex(new Vector3(x - 0.5f, y + 0.5f, z - 0.5f));
-                meshData.AddVertex(new Vector3(x + 0.5f, y + 0.5f, z - 0.5f));
-                meshData.AddVertex(new Vector3(x + 0.5f, y - 0.5f, z - 0.5f));
+                meshData.AddVertex(new Vector3(x - xCorner, y - yCorner, z - zCorner));
+                meshData.AddVertex(new Vector3(x - xCorner, y + yCorner, z - zCorner));
+                meshData.AddVertex(new Vector3(x + xCorner, y + yCorner, z - zCorner));
+                meshData.AddVertex(new Vector3(x + xCorner, y - yCorner, z - zCorner));
                 break;
             case Direction.foreward:
-                meshData.AddVertex(new Vector3(x + 0.5f, y - 0.5f, z + 0.5f));
-                meshData.AddVertex(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f));
-                meshData.AddVertex(new Vector3(x - 0.5f, y + 0.5f, z + 0.5f));
-                meshData.AddVertex(new Vector3(x - 0.5f, y - 0.5f, z + 0.5f));
-                break;
+                meshData.AddVertex(new Vector3(x + xCorner, y - yCorner, z + zCorner));
+                meshData.AddVertex(new Vector3(x + xCorner, y + yCorner, z + zCorner));
+                meshData.AddVertex(new Vector3(x - xCorner, y + yCorner, z + zCorner));
+                meshData.AddVertex(new Vector3(x - xCorner, y - yCorner, z + zCorner));
+                break; 
             case Direction.left:
-                meshData.AddVertex(new Vector3(x - 0.5f, y - 0.5f, z + 0.5f));
-                meshData.AddVertex(new Vector3(x - 0.5f, y + 0.5f, z + 0.5f));
-                meshData.AddVertex(new Vector3(x - 0.5f, y + 0.5f, z - 0.5f));
-                meshData.AddVertex(new Vector3(x - 0.5f, y - 0.5f, z - 0.5f));
+                meshData.AddVertex(new Vector3(x - xCorner, y - yCorner, z + zCorner));
+                meshData.AddVertex(new Vector3(x - xCorner, y + yCorner, z + zCorner));
+                meshData.AddVertex(new Vector3(x - xCorner, y + yCorner, z - zCorner));
+                meshData.AddVertex(new Vector3(x - xCorner, y - yCorner, z - zCorner));
                 break;
 
             case Direction.right:
-                meshData.AddVertex(new Vector3(x + 0.5f, y - 0.5f, z - 0.5f));
-                meshData.AddVertex(new Vector3(x + 0.5f, y + 0.5f, z - 0.5f));
-                meshData.AddVertex(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f));
-                meshData.AddVertex(new Vector3(x + 0.5f, y - 0.5f, z + 0.5f));
+                meshData.AddVertex(new Vector3(x + xCorner, y - yCorner, z - zCorner));
+                meshData.AddVertex(new Vector3(x + xCorner, y + yCorner, z - zCorner));
+                meshData.AddVertex(new Vector3(x + xCorner, y + yCorner, z + zCorner));
+                meshData.AddVertex(new Vector3(x + xCorner, y - yCorner, z + zCorner));
                 break;
             case Direction.down:
-                meshData.AddVertex(new Vector3(x - 0.5f, y - 0.5f, z - 0.5f));
-                meshData.AddVertex(new Vector3(x + 0.5f, y - 0.5f, z - 0.5f));
-                meshData.AddVertex(new Vector3(x + 0.5f, y - 0.5f, z + 0.5f));
-                meshData.AddVertex(new Vector3(x - 0.5f, y - 0.5f, z + 0.5f));
+                meshData.AddVertex(new Vector3(x - xCorner, y - yCorner, z - zCorner));
+                meshData.AddVertex(new Vector3(x + xCorner, y - yCorner, z - zCorner));
+                meshData.AddVertex(new Vector3(x + xCorner, y - yCorner, z + zCorner));
+                meshData.AddVertex(new Vector3(x - xCorner, y - yCorner, z + zCorner));
                 break;
             case Direction.up:
-                meshData.AddVertex(new Vector3(x - 0.5f, y + 0.5f, z + 0.5f));
-                meshData.AddVertex(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f));
-                meshData.AddVertex(new Vector3(x + 0.5f, y + 0.5f, z - 0.5f));
-                meshData.AddVertex(new Vector3(x - 0.5f, y + 0.5f, z - 0.5f));
+                meshData.AddVertex(new Vector3(x - xCorner, y + yCorner, z + zCorner));
+                meshData.AddVertex(new Vector3(x + xCorner, y + yCorner, z + zCorner));
+                meshData.AddVertex(new Vector3(x + xCorner, y + yCorner, z - zCorner));
+                meshData.AddVertex(new Vector3(x - xCorner, y + yCorner, z - zCorner));
                 break;
             default:
                 break;
