@@ -90,13 +90,13 @@ public static class Chunk
 
     internal static Vector3Int ChunkPositionFromBlockCoords(World world, int x, int y, int z)
     {
-        int chunkSize = world.chunkSize;
-        int chunkHeight = world.chunkHeight;
+        Vector3Int chunkSize = world.chunkSize;
+        
         Vector3Int pos = new()
         {
-            x = Mathf.FloorToInt(x / (float)chunkSize) * chunkSize,
-            y = Mathf.FloorToInt(y / (float)chunkHeight) *  chunkHeight,
-            z = Mathf.FloorToInt(z / (float)chunkSize) * chunkSize
+            x = Mathf.FloorToInt(x / (float)chunkSize.x) * chunkSize.x,
+            y = Mathf.FloorToInt(y / (float)chunkSize.y) * chunkSize.y,
+            z = Mathf.FloorToInt(z / (float)chunkSize.z) * chunkSize.z
         };
         return pos;
     }
