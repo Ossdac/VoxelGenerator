@@ -33,8 +33,8 @@ public class World : MonoBehaviour
             {
                 for (int z = 0; z < mapSizeInChunks.z; z++)
                 {
-                    ChunkData chunkData = new ChunkData(chunkSize, blockSize,
-                        this, new Vector3Int(x * chunkSize.x, y * chunkSize.y, z * chunkSize.z));
+                    ChunkData chunkData = new ChunkData(chunkSize, blockSize, this,
+                        new Vector3Int(x * chunkSize.x, y * chunkSize.y, z * chunkSize.z));
                     GenerateVoxels(chunkData);
                     chunkDataDictionary.Add(chunkData.worldPosition, chunkData);
                 }
@@ -128,7 +128,7 @@ public class World : MonoBehaviour
             {
                 for (int z = 0; z < chunkCountZ; z++)
                 {
-                    Vector3Int chunkPosition = new Vector3Int(x * chunkSize.x, 0, z * chunkSize.z);
+                    Vector3Int chunkPosition = new Vector3Int(x * chunkSize.x, y * chunkSize.y, z * chunkSize.z);
                     ChunkData chunkData = new ChunkData(chunkSize, blockSize, this, chunkPosition);
                     int[,] chunkArray = ExtractChunkArray(worldArray, x, z, lengthX, lengthZ);
                     GenerateVoxels(chunkData, chunkArray);
@@ -157,7 +157,7 @@ public class World : MonoBehaviour
             {
                 for (int z = 0; z <= chunkCountZ; z++)
                 {
-                    Vector3Int chunkPosition = new Vector3Int(x * chunkSize.x, 0, z * chunkSize.z);
+                    Vector3Int chunkPosition = new Vector3Int(x * chunkSize.x, y * chunkSize.y, z * chunkSize.z);
                     ChunkData chunkData = new ChunkData(chunkSize, blockSize, this, chunkPosition);
                     float[,] chunkArray = ExtractChunkArray(worldArray, x, z, lengthX, lengthZ);
                     GenerateVoxels(chunkData, chunkArray);
@@ -188,18 +188,21 @@ public class World : MonoBehaviour
     private void GenerateVoxels(ChunkData data)
     {
         Vector3Int chunkSize = data.chunkSize;
+        int startX = data.worldPosition.x;
+        int startY = data.worldPosition.y;
+        int startZ = data.worldPosition.z;
         int chunkXSize = chunkSize.x;
         int chunkYSize = chunkSize.y;
         int chunkZSize = chunkSize.z;
-        int totalHeitht = chunkZSize * mapSizeInChunks.z;
+        int totalHeitht = chunkYSize * mapSizeInChunks.y;
         for (int x = 0; x < chunkXSize; x++)
         {
-            for (int z = 0; z < chunkYSize; z++)
+            for (int z = 0; z < chunkZSize; z++)
             {
-                float noiseValue = Mathf.PerlinNoise((data.worldPosition.x + x) * 
-                    noiseScale, (data.worldPosition.z + z) * noiseScale);
+                float noiseValue = Mathf.PerlinNoise((startX + x) * 
+                    noiseScale, (startZ + z) * noiseScale);
                 int groundPosition = Mathf.RoundToInt(noiseValue * totalHeitht);
-                for (int y = 0; y < chunkZSize; y++)
+                for (int y = startY; y < chunkYSize + startY; y++)
                 {
                     BlockType voxelType = BlockType.Wall;
                     if (y > groundPosition)
@@ -210,7 +213,7 @@ public class World : MonoBehaviour
                     {
                         voxelType = BlockType.Ground;
                     }
-                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
+                    Chunk.SetBlock(data, new Vector3Int(x, y-startY, z), voxelType);
                 }
             }
         }
@@ -257,11 +260,14 @@ public class World : MonoBehaviour
     
     private void GenerateVoxels(ChunkData data, float[,] preMadeArray)
     {
+
         Vector3Int chunkSize = data.chunkSize;
+        
+        int startY = data.worldPosition.y;
         int chunkXSize = chunkSize.x;
         int chunkYSize = chunkSize.y;
         int chunkZSize = chunkSize.z;
-        int totalHeitht = chunkZSize * mapSizeInChunks.z;
+        int totalHeitht = chunkYSize * mapSizeInChunks.y;
 
         for (int x = 0; x < chunkXSize; x++)
         {
@@ -269,7 +275,7 @@ public class World : MonoBehaviour
             {
                 int groundPosition = Mathf.RoundToInt(preMadeArray[x,z] * totalHeitht);
                
-                for (int y = 0; y < chunkYSize; y++)
+                for (int y = startY; y < chunkYSize + startY; y++)
                 {
                     BlockType voxelType = BlockType.Air;
                     if (y < groundPosition)
@@ -280,7 +286,7 @@ public class World : MonoBehaviour
                     {
                         voxelType = BlockType.Ground;
                     }
-                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
+                    Chunk.SetBlock(data, new Vector3Int(x, y - startY, z), voxelType);
                 }
             }
         }
@@ -289,6 +295,7 @@ public class World : MonoBehaviour
     private void GenerateVoxels(ChunkData data, int[,] preMadeArray)
     {
         Vector3Int chunkSize = data.chunkSize;
+        int startY = data.worldPosition.y;
         int chunkXSize = chunkSize.x;
         int chunkYSize = chunkSize.y;
         int chunkZSize = chunkSize.z;
@@ -298,11 +305,11 @@ public class World : MonoBehaviour
             {
                 int groundPosition = preMadeArray[x, z];
                 BlockType voxelType = BlockType.Air;
-                for (int y = chunkYSize - 1; y >= 0; y--)
+                for (int y = startY + chunkYSize - 1; y >= startY; y--)
                 {
                     if (groundPosition != 0 && y <= groundPosition)
                         voxelType = BlockType.Wall;
-                    Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);                    
+                    Chunk.SetBlock(data, new Vector3Int(x, y - startY, z), voxelType);                    
                 }
             }
         }
@@ -325,7 +332,7 @@ public class World : MonoBehaviour
     private void RenderChunk(ChunkData chunkData)
     {
         MeshData meshData = Chunk.GetChunkMeshData(chunkData);
-        GameObject chunkObject = Instantiate(chunkPrefab, chunkData.worldPosition, Quaternion.identity);
+        GameObject chunkObject = Instantiate(chunkPrefab, Vector3.Scale(blockSize, chunkData.worldPosition), Quaternion.identity);
         ChunkRenderer chunkRenderer = chunkObject.GetComponent<ChunkRenderer>();
         chunkDictionary.Add(chunkData.worldPosition, chunkRenderer);
         chunkRenderer.InitializeChunk(chunkData);

@@ -184,7 +184,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &182773097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -331,7 +331,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &724223513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -353,7 +353,7 @@ MonoBehaviour:
   updateInterval: 1
   manualUpdateClick: 1
   manualUpdateHold: 0
-  gameIndex: 2
+  gameIndex: 1
 --- !u!4 &724223514
 Transform:
   m_ObjectHideFlags: 0
@@ -632,9 +632,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f570495579d7513438503e660fec27c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapSizeInChunks: 50
-  chunkSize: 10
-  chunkHeight: 1
+  mapSizeInChunks: {x: 6, y: 6, z: 6}
+  chunkSize: {x: 16, y: 16, z: 16}
+  blockSize: {x: 0.25, y: 0.2, z: 1}
   noiseScale: 0.02
   chunkPrefab: {fileID: 2543376799029590482, guid: d7a69a4bbab32f848a12842a0a7e247b, type: 3}
   renderNothing: 1

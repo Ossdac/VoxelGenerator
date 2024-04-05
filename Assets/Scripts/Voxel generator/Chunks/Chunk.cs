@@ -26,8 +26,8 @@ public static class Chunk
     private static bool InRange(ChunkData chunkData, Vector3 axisCoordinate)
     {
         Vector3Int chunkSize = chunkData.chunkSize;
-        if ((axisCoordinate.x < 0 || axisCoordinate.x >= chunkSize.x) &&
-            (axisCoordinate.y < 0 || axisCoordinate.y >= chunkSize.y) &&
+        if ((axisCoordinate.x < 0 || axisCoordinate.x >= chunkSize.x) ||
+            (axisCoordinate.y < 0 || axisCoordinate.y >= chunkSize.y) ||
             (axisCoordinate.z < 0 || axisCoordinate.z >= chunkSize.z))
             return false;
 
