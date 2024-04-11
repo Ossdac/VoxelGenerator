@@ -3,14 +3,11 @@ using UnityEngine;
 public class Voxelizer : MonoBehaviour
 {
     public GameObject targetObject;
-    public int sizeLongestAxis = 100;
-    private Vector3Int arrayDimensions;
+    public Vector3Int size = new(50, 50, 50);
     private bool[,,] voxelGrid;
 
     [SerializeField] private World world;
-
-    [SerializeField] private Vector3 scanDimentions;
-
+      
     [SerializeField] private bool matchBlockSize;
 
     [SerializeField] private bool autoSize;
@@ -41,8 +38,8 @@ public class Voxelizer : MonoBehaviour
     {
         Bounds bounds = CalculateBounds(obj);
         CalculateArrayDimensions(bounds);
-        voxelGrid = new bool[arrayDimensions.x,
-            arrayDimensions.y, arrayDimensions.z];
+        voxelGrid = new bool[size.x,
+            size.y, size.z];
         FillVoxelGrid(bounds);
     }
 
@@ -59,29 +56,30 @@ public class Voxelizer : MonoBehaviour
 
     void CalculateArrayDimensions(Bounds bounds)
     {
-        float longestSide = Mathf.Max(bounds.size.x,
-            bounds.size.y, bounds.size.z);
-        float xRatio = bounds.size.x / longestSide;
-        float yRatio = bounds.size.y / longestSide;
-        float zRatio = bounds.size.z / longestSide;
-
+   
         if (autoSize)
-            sizeLongestAxis = Mathf.CeilToInt(longestSide);
-
+        {
+            size = new Vector3Int(
+                Mathf.CeilToInt(bounds.size.x),
+                Mathf.CeilToInt(bounds.size.y),
+                Mathf.CeilToInt(bounds.size.z));
+        }
         if (matchBlockSize)
-            scanDimentions = world.blockSize;
-
-        arrayDimensions = new Vector3Int(
-            Mathf.CeilToInt(sizeLongestAxis * xRatio * scanDimentions.x),
-            Mathf.CeilToInt(sizeLongestAxis * yRatio * scanDimentions.y),
-            Mathf.CeilToInt(sizeLongestAxis * zRatio * scanDimentions.z));
+        {
+            size = new Vector3Int(
+                Mathf.CeilToInt(size.x / world.blockSize.x),
+                Mathf.CeilToInt(size.y / world.blockSize.y),
+                Mathf.CeilToInt(size.z / world.blockSize.z));
+        }
+        
+          
     }
 
     void FillVoxelGrid(Bounds bounds)
     {
-        int arrayDimensionsX = arrayDimensions.x;
-        int arrayDimensionsY = arrayDimensions.y;
-        int arrayDimensionsZ = arrayDimensions.z;
+        int arrayDimensionsX = size.x;
+        int arrayDimensionsY = size.y;
+        int arrayDimensionsZ = size.z;
         float voxelSizeX = bounds.size.x / arrayDimensionsX;
         float voxelSizeY = bounds.size.y / arrayDimensionsY;
         float voxelSizeZ = bounds.size.z / arrayDimensionsZ;
