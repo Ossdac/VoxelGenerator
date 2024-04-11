@@ -9,6 +9,10 @@ public class Voxelizer : MonoBehaviour
 
     [SerializeField] private World world;
 
+    [SerializeField] private Vector3 scanDimentions;
+
+    [SerializeField] private bool matchBlockSize;
+
     [SerializeField] private bool autoSize;
 
     [SerializeField] private bool solid;
@@ -63,10 +67,14 @@ public class Voxelizer : MonoBehaviour
 
         if (autoSize)
             sizeLongestAxis = Mathf.CeilToInt(longestSide);
+
+        if (matchBlockSize)
+            scanDimentions = world.blockSize;
+
         arrayDimensions = new Vector3Int(
-            Mathf.CeilToInt(sizeLongestAxis * xRatio),
-            Mathf.CeilToInt(sizeLongestAxis * yRatio),
-            Mathf.CeilToInt(sizeLongestAxis * zRatio));
+            Mathf.CeilToInt(sizeLongestAxis * xRatio * scanDimentions.x),
+            Mathf.CeilToInt(sizeLongestAxis * yRatio * scanDimentions.y),
+            Mathf.CeilToInt(sizeLongestAxis * zRatio * scanDimentions.z));
     }
 
     void FillVoxelGrid(Bounds bounds)
@@ -77,10 +85,9 @@ public class Voxelizer : MonoBehaviour
         float voxelSizeX = bounds.size.x / arrayDimensionsX;
         float voxelSizeY = bounds.size.y / arrayDimensionsY;
         float voxelSizeZ = bounds.size.z / arrayDimensionsZ;
-        Vector3 voxelSize = new Vector3(
-            bounds.size.x / arrayDimensionsX,
-            bounds.size.y / arrayDimensionsY,
-            bounds.size.z / arrayDimensionsZ);
+        Vector3 voxelHalfSize = new Vector3(voxelSizeX,
+            voxelSizeY, voxelSizeZ) * .5f;
+        Debug.Log(voxelHalfSize);
 
         for (int x = 0; x < arrayDimensionsX; x++)
         {
@@ -93,7 +100,7 @@ public class Voxelizer : MonoBehaviour
                         voxelSizeY * (y + 0.5f),
                         voxelSizeZ * (z + 0.5f));
                     bool occupied = Physics.CheckBox(center,
-                        voxelSize * 0.5f, Quaternion.identity);
+                        voxelHalfSize, Quaternion.identity);
                     voxelGrid[x, y, z] = occupied;
                 }
             }
