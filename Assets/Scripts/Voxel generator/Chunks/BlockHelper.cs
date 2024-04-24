@@ -1,4 +1,4 @@
-using Unity.VisualScripting;
+using System.Collections.Generic;
 using UnityEngine;
 
 public static class BlockHelper
@@ -7,8 +7,10 @@ public static class BlockHelper
     private static bool renderNothing;
     private static bool renderDown;
 
-    public static bool RenderNothing {set { renderNothing = value;}}
+    public static bool RenderNothing { set { renderNothing = value; } }
     public static bool RenderDown { set { renderDown = value; } }
+
+    private static Dictionary<Vector2, Vector2[]> uvCache = new Dictionary<Vector2, Vector2[]>();
 
     private static readonly Direction[] directions =
     {
@@ -22,7 +24,7 @@ public static class BlockHelper
 
     public static MeshData GetMeshData(ChunkData chunk, int x, int y, int z, MeshData meshData, BlockType blockType)
     {
-     
+
         if (blockType == BlockType.Nothing || blockType == BlockType.Air)
             return meshData;
 
@@ -37,7 +39,7 @@ public static class BlockHelper
                 (renderDown || !direction.Equals(Direction.down)))
             {
 
-                    meshData = GetFaceDataIn(direction, x, y, z, meshData, blockType, chunk);                
+                meshData = GetFaceDataIn(direction, x, y, z, meshData, blockType, chunk);
             }
         }
 
@@ -77,7 +79,7 @@ public static class BlockHelper
                 meshData.AddVertex(new Vector3(xCenter + xCorner, yCenter + yCorner, zCenter + zCorner));
                 meshData.AddVertex(new Vector3(xCenter - xCorner, yCenter + yCorner, zCenter + zCorner));
                 meshData.AddVertex(new Vector3(xCenter - xCorner, yCenter - yCorner, zCenter + zCorner));
-                break; 
+                break;
             case Direction.left:
                 meshData.AddVertex(new Vector3(xCenter - xCorner, yCenter - yCorner, zCenter + zCorner));
                 meshData.AddVertex(new Vector3(xCenter - xCorner, yCenter + yCorner, zCenter + zCorner));
@@ -110,27 +112,31 @@ public static class BlockHelper
 
     public static Vector2[] FaceUVs(Direction direction, BlockType blockType)
     {
-        Vector2[] UVs = new Vector2[4];
-        Vector2 tilePos = TexturePosition(direction, blockType);
-        float tilePosX = tilePos.x;
-        float tilePosY = tilePos.y;
+        Vector2 texturePosition = TexturePosition(direction, blockType);
+
+        if (uvCache.TryGetValue(texturePosition, out Vector2[] cachedUVs))
+        {
+            return cachedUVs;
+        }
+
+        float tilePosX = texturePosition.x;
+        float tilePosY = texturePosition.y;
         float tileSizeX = BlockDataManager.tileSizeX;
         float tileSizeY = BlockDataManager.tileSizeY;
 
-        UVs[0] = new Vector2(tileSizeX * tilePosX + tileSizeX,
-            tileSizeY * tilePosY);
+        Vector2[] UVs = new Vector2[]
+        {
+        new Vector2(tileSizeX * tilePosX + tileSizeX, tileSizeY * tilePosY),
+        new Vector2(tileSizeX * tilePosX + tileSizeX, tileSizeY * tilePosY + tileSizeY),
+        new Vector2(tileSizeX * tilePosX, tileSizeY * tilePosY + tileSizeY),
+        new Vector2(tileSizeX * tilePosX, tileSizeY * tilePosY)
+        };
 
-        UVs[1] = new Vector2(tileSizeX * tilePosX + tileSizeX,
-            tileSizeY * tilePosY + tileSizeY);
-
-        UVs[2] = new Vector2(tileSizeX * tilePosX,
-            tileSizeY * tilePosY + tileSizeY);
-
-        UVs[3] = new Vector2(tileSizeX * tilePosX,
-            tileSizeY * tilePosY);
+        uvCache.Add(texturePosition, UVs);
 
         return UVs;
     }
+
 
     public static Vector2 TexturePosition(Direction direction, BlockType blockType)
     {
