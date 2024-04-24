@@ -40,7 +40,6 @@ public class World : MonoBehaviour
                 }
             }
         }
-
         foreach (ChunkData chunkData in chunkDataDictionary.Values)
         {
             RenderChunk(chunkData);

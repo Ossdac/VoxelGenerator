@@ -126,10 +126,10 @@ public static class BlockHelper
 
         Vector2[] UVs = new Vector2[]
         {
-        new Vector2(tileSizeX * tilePosX + tileSizeX, tileSizeY * tilePosY),
-        new Vector2(tileSizeX * tilePosX + tileSizeX, tileSizeY * tilePosY + tileSizeY),
-        new Vector2(tileSizeX * tilePosX, tileSizeY * tilePosY + tileSizeY),
-        new Vector2(tileSizeX * tilePosX, tileSizeY * tilePosY)
+        new(tileSizeX * tilePosX + tileSizeX, tileSizeY * tilePosY),
+        new(tileSizeX * tilePosX + tileSizeX, tileSizeY * tilePosY + tileSizeY),
+        new(tileSizeX * tilePosX, tileSizeY * tilePosY + tileSizeY),
+        new(tileSizeX * tilePosX, tileSizeY * tilePosY)
         };
 
         uvCache.Add(texturePosition, UVs);
