@@ -331,7 +331,8 @@ public class World : MonoBehaviour
     private void RenderChunk(ChunkData chunkData)
     {
         MeshData meshData = Chunk.GetChunkMeshData(chunkData);
-        GameObject chunkObject = Instantiate(chunkPrefab, Vector3.Scale(blockSize, chunkData.worldPosition), Quaternion.identity);
+        GameObject chunkObject = Instantiate(chunkPrefab, Vector3.Scale(blockSize,
+            chunkData.worldPosition), Quaternion.identity);
         ChunkRenderer chunkRenderer = chunkObject.GetComponent<ChunkRenderer>();
         chunkDictionary.Add(chunkData.worldPosition, chunkRenderer);
         chunkRenderer.InitializeChunk(chunkData);
