@@ -198,11 +198,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetObject: {fileID: 5145476182278728371, guid: 7fce13f41cfd71746b1cdc569588f92d, type: 3}
-  sizeLongestAxis: 50
+  size: {x: 20, y: 34, z: 50}
   world: {fileID: 1645809947}
-  scanDimentions: {x: 0, y: 0, z: 0}
   matchBlockSize: 1
   autoSize: 1
+  scale: 1
+  scaleFactor: 0.25
   solid: 1
 --- !u!4 &182773098
 Transform:
@@ -589,7 +590,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   chunks: []
   prefabFolder: Dragons
-  prefabName: Dragon_auto_solid
+  prefabName: Dragon_X.25
 --- !u!4 &1200219154
 Transform:
   m_ObjectHideFlags: 0
@@ -635,12 +636,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapSizeInChunks: {x: 6, y: 6, z: 6}
-  chunkSize: {x: 50, y: 50, z: 50}
+  chunkSize: {x: 40, y: 34, z: 50}
   blockSize: {x: 0.5, y: 1, z: 1}
   noiseScale: 0.02
   chunkPrefab: {fileID: 2543376799029590482, guid: d7a69a4bbab32f848a12842a0a7e247b, type: 3}
   renderNothing: 1
-  renderDown: 0
+  renderDown: 1
 --- !u!4 &1645809948
 Transform:
   m_ObjectHideFlags: 0

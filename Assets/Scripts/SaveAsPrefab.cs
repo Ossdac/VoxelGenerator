@@ -29,6 +29,10 @@ public class SaveToPrefab : MonoBehaviour
     [ContextMenu("Go")]
     public void CreatePrefab()
     {
+        if (chunks.Length == 0 || chunks[0] == null)
+        {
+            AddChunkRenderersToChunks();
+        }
         GameObject prefab = new GameObject();
         prefabPath = Path.Combine("Assets", prefabFolder);
         meshPath = Path.Combine(prefabPath, prefabName + "Parts");
@@ -41,7 +45,7 @@ public class SaveToPrefab : MonoBehaviour
             {
                 AssetDatabase.CreateAsset(mesh, Path.Combine(meshPath,
                     "Part" + counter++ + ".asset"));
-                DestroyImmediate(chunk.GetComponent<ChunkRenderer>(), true); // using DestroyImmediate for editor scripting
+                Destroy(chunk.GetComponent<ChunkRenderer>()); 
                 chunk.transform.parent = prefab.transform;
             }
         }
@@ -49,6 +53,12 @@ public class SaveToPrefab : MonoBehaviour
             prefabName + ".prefab"));
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
+        Destroy(prefab);
+        for (int i = 0; i < chunks.Length; i++)
+        {
+            if (chunks[i] != null)
+                Destroy(chunks[i]);
+        }
     }
 
     private void CheckDirectorys()

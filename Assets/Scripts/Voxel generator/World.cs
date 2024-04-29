@@ -33,7 +33,7 @@ public class World : MonoBehaviour
             {
                 for (int z = 0; z < mapSizeInChunks.z; z++)
                 {
-                    ChunkData chunkData = new ChunkData(chunkSize, blockSize, this,
+                    ChunkData chunkData = new(chunkSize, blockSize, this,
                         new Vector3Int(x * chunkSize.x, y * chunkSize.y, z * chunkSize.z));
                     GenerateVoxels(chunkData);
                     chunkDataDictionary.Add(chunkData.worldPosition, chunkData);
@@ -95,8 +95,8 @@ public class World : MonoBehaviour
             {
                 for (int z = 0; z < chunkCountZ; z++)
                 {
-                    Vector3Int chunkPosition = new(x * chunkSize.z, y * chunkSize.y, z * chunkSize.z);
-                    ChunkData chunkData = new(chunkSize, blockSize, this, chunkPosition);
+                    ChunkData chunkData = new(chunkSize, blockSize, this,
+                        new Vector3Int(x * chunkSize.x, y * chunkSize.y, z * chunkSize.z));
                     bool[,,] chunkArray = ExtractChunkArray(worldArray, x, y, z, lengthX, lengthY, lengthZ);
                     GenerateVoxels(chunkData, chunkArray);
                     chunkDataDictionary.Add(chunkData.worldPosition, chunkData);
@@ -177,7 +177,8 @@ public class World : MonoBehaviour
         chunkDataDictionary.Clear();
         foreach (ChunkRenderer chunk in chunkDictionary.Values)
         {
-            Destroy(chunk.gameObject);
+            if (chunk != null)
+                Destroy(chunk.gameObject);
         }
         chunkDictionary.Clear();
         BlockHelper.RenderNothing = renderNothing;
