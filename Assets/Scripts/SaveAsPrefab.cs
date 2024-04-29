@@ -14,23 +14,34 @@ public class SaveToPrefab : MonoBehaviour
 
     private string prefabPath;
     private string meshPath;
-    
+
+    [ContextMenu("Add Chunk Renderers")]
+    public void AddChunkRenderersToChunks()
+    {
+        ChunkRenderer[] renderers = FindObjectsOfType<ChunkRenderer>();
+        chunks = new GameObject[renderers.Length];
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            chunks[i] = renderers[i].gameObject;
+        }
+    }
+
     [ContextMenu("Go")]
     public void CreatePrefab()
     {
-        GameObject prefab = new();
+        GameObject prefab = new GameObject();
         prefabPath = Path.Combine("Assets", prefabFolder);
         meshPath = Path.Combine(prefabPath, prefabName + "Parts");
         CheckDirectorys();
         int counter = 0;
-        foreach (GameObject chunk in chunks) 
+        foreach (GameObject chunk in chunks)
         {
             Mesh mesh = chunk.GetComponent<MeshFilter>().mesh;
-            if (mesh.vertices.Length > 0)
+            if (mesh != null && mesh.vertices.Length > 0)
             {
                 AssetDatabase.CreateAsset(mesh, Path.Combine(meshPath,
                     "Part" + counter++ + ".asset"));
-                Destroy(chunk.GetComponent<ChunkRenderer>());
+                DestroyImmediate(chunk.GetComponent<ChunkRenderer>(), true); // using DestroyImmediate for editor scripting
                 chunk.transform.parent = prefab.transform;
             }
         }

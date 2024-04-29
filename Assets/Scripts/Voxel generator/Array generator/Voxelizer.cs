@@ -11,6 +11,8 @@ public class Voxelizer : MonoBehaviour
     [SerializeField] private bool matchBlockSize;
 
     [SerializeField] private bool autoSize;
+    [SerializeField] private bool scale;
+    [SerializeField] private float scaleFactor;
 
     [SerializeField] private bool solid;
 
@@ -56,13 +58,19 @@ public class Voxelizer : MonoBehaviour
 
     void CalculateArrayDimensions(Bounds bounds)
     {
-   
         if (autoSize)
         {
             size = new Vector3Int(
                 Mathf.CeilToInt(bounds.size.x),
                 Mathf.CeilToInt(bounds.size.y),
                 Mathf.CeilToInt(bounds.size.z));
+            if (scale)
+            {
+                size = new Vector3Int(
+                Mathf.CeilToInt(size.x * scaleFactor),
+                Mathf.CeilToInt(size.y * scaleFactor),
+                Mathf.CeilToInt(size.z * scaleFactor));
+            }
         }
         if (matchBlockSize)
         {
@@ -71,8 +79,6 @@ public class Voxelizer : MonoBehaviour
                 Mathf.CeilToInt(size.y / world.blockSize.y),
                 Mathf.CeilToInt(size.z / world.blockSize.z));
         }
-        
-          
     }
 
     void FillVoxelGrid(Bounds bounds)
