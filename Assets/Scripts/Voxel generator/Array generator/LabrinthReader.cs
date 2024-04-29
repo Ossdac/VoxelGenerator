@@ -50,7 +50,6 @@ public class LabyrinthReader : MonoBehaviour
             positions[Mathf.FloorToInt((cube.position.x - minX) /scale), 
                 Mathf.FloorToInt((cube.position.z - minZ) / scale)] = true;
         }
-        
         world.GenerateWorld(positions);
     }
 
