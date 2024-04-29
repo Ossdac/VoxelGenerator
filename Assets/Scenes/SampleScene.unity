@@ -184,7 +184,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &182773097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -502,7 +502,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 5000
   field of view: 50
   orthographic: 0
   orthographic size: 5
@@ -632,12 +632,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f570495579d7513438503e660fec27c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapSizeInChunks: 50
-  chunkSize: 10
-  chunkHeight: 1
+  mapSizeInChunks: 100
+  chunkSize: 50
+  chunkHeight: 100
   noiseScale: 0.02
   chunkPrefab: {fileID: 2543376799029590482, guid: d7a69a4bbab32f848a12842a0a7e247b, type: 3}
-  renderNothing: 1
+  renderNothing: 0
   renderDown: 0
 --- !u!4 &1645809948
 Transform:
