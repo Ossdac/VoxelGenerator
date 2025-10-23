@@ -202,10 +202,17 @@ public class World : MonoBehaviour
             for (int z = 0; z < chunkSize; z++)
             {
                 BlockType voxelType = preMadeArray[x, z] ? BlockType.Wall : BlockType.Air;
-                for (int y = 0; y < chunkHeight; y++)
+                for (int y = 0; y < chunkHeight - 1; y++)
                 {
                     Chunk.SetBlock(data, new Vector3Int(x, y, z), voxelType);
                 }
+            }
+        }
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int z = 0; z < chunkSize; z++)
+            {
+                Chunk.SetBlock(data, new Vector3Int(x, chunkHeight-1, z), BlockType.Air);
             }
         }
     }

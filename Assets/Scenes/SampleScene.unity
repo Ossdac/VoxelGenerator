@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -331,7 +330,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &724223513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -353,7 +352,7 @@ MonoBehaviour:
   updateInterval: 1
   manualUpdateClick: 1
   manualUpdateHold: 0
-  gameIndex: 2
+  gameIndex: 3
 --- !u!4 &724223514
 Transform:
   m_ObjectHideFlags: 0
@@ -437,11 +436,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   world: {fileID: 1645809947}
   size: 50
-  birthRange: {x: 3, y: 3}
-  deathRange: {x: 1, y: 4}
+  birthRange: {x: 4, y: 4}
+  deathRange: {x: 4, y: 4}
   saturationValue: 0.5
   bottomFill: 1
-  topFill: 1
+  topFill: 0
   diagonalsFill: 1
 --- !u!1 &963194225
 GameObject:
@@ -529,13 +528,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -174.4, y: 91, z: 1250}
+  m_LocalRotation: {x: -0.051848713, y: 0.70520335, z: 0.051848713, w: 0.70520335}
+  m_LocalPosition: {x: 0, y: 30, z: 25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: -8.41, y: 90, z: 0}
 --- !u!114 &963194229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -633,8 +632,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapSizeInChunks: 100
-  chunkSize: 50
-  chunkHeight: 100
+  chunkSize: 10
+  chunkHeight: 10
   noiseScale: 0.02
   chunkPrefab: {fileID: 2543376799029590482, guid: d7a69a4bbab32f848a12842a0a7e247b, type: 3}
   renderNothing: 0
