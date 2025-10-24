@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -184,7 +183,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &182773097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -198,12 +197,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetObject: {fileID: 5145476182278728371, guid: 7fce13f41cfd71746b1cdc569588f92d, type: 3}
-  size: {x: 20, y: 34, z: 50}
+  size: {x: 50, y: 50, z: 50}
   world: {fileID: 1645809947}
-  matchBlockSize: 1
+  matchBlockSize: 0
   autoSize: 1
-  scale: 1
-  scaleFactor: 0.25
+  scale: 0
+  scaleFactor: 0
   solid: 1
 --- !u!4 &182773098
 Transform:
@@ -334,7 +333,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &724223513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -440,11 +439,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   world: {fileID: 1645809947}
   size: 50
-  birthRange: {x: 3, y: 3}
-  deathRange: {x: 1, y: 4}
+  birthRange: {x: 4, y: 4}
+  deathRange: {x: 4, y: 4}
   saturationValue: 0.5
   bottomFill: 1
-  topFill: 1
+  topFill: 0
   diagonalsFill: 1
 --- !u!1 &963194225
 GameObject:
@@ -505,7 +504,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 5000
   field of view: 50
   orthographic: 0
   orthographic size: 5
@@ -532,13 +531,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -174.4, y: 91, z: 1250}
+  m_LocalRotation: {x: -0.051848713, y: 0.70520335, z: 0.051848713, w: 0.70520335}
+  m_LocalPosition: {x: 0, y: 30, z: 25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: -8.41, y: 90, z: 0}
 --- !u!114 &963194229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -590,7 +589,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   chunks: []
   prefabFolder: Dragons
-  prefabName: Dragon_X.25
+  prefabName: Dragon_auto_solid
 --- !u!4 &1200219154
 Transform:
   m_ObjectHideFlags: 0
@@ -635,13 +634,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f570495579d7513438503e660fec27c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapSizeInChunks: {x: 6, y: 6, z: 6}
-  chunkSize: {x: 40, y: 34, z: 50}
-  blockSize: {x: 0.5, y: 1, z: 1}
-  noiseScale: 0.02
+  mapSizeInChunks: {x: 50, y: 1, z: 50}
+  chunkSize: {x: 10, y: 100, z: 10}
+  blockSize: {x: 1, y: 1, z: 1}
+  noiseScale: 0.04
   chunkPrefab: {fileID: 2543376799029590482, guid: d7a69a4bbab32f848a12842a0a7e247b, type: 3}
-  renderNothing: 1
-  renderDown: 1
+  renderNothing: 0
+  renderDown: 0
 --- !u!4 &1645809948
 Transform:
   m_ObjectHideFlags: 0
