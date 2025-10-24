@@ -183,7 +183,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &182773097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,12 +197,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetObject: {fileID: 5145476182278728371, guid: 7fce13f41cfd71746b1cdc569588f92d, type: 3}
-  size: {x: 50, y: 50, z: 50}
+  size: {x: 20, y: 34, z: 70}
   world: {fileID: 1645809947}
   matchBlockSize: 0
-  autoSize: 1
+  autoSize: 0
   scale: 0
-  scaleFactor: 0
+  scaleFactor: 0.25
   solid: 1
 --- !u!4 &182773098
 Transform:
@@ -333,7 +333,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &724223513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -639,8 +639,8 @@ MonoBehaviour:
   blockSize: {x: 1, y: 1, z: 1}
   noiseScale: 0.04
   chunkPrefab: {fileID: 2543376799029590482, guid: d7a69a4bbab32f848a12842a0a7e247b, type: 3}
-  renderNothing: 0
-  renderDown: 0
+  renderNothing: 1
+  renderDown: 1
 --- !u!4 &1645809948
 Transform:
   m_ObjectHideFlags: 0
