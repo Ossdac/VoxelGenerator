@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public static class BlockHelper
@@ -8,6 +9,9 @@ public static class BlockHelper
 
     public static bool RenderNothing {set { renderNothing = value;}}
     public static bool RenderDown { set { renderDown = value; } }
+    
+    private static Dictionary<Vector2, Vector2[]> uvCache = new Dictionary<Vector2, Vector2[]>();
+
 
     private static readonly Direction[] directions =
     {
@@ -32,7 +36,7 @@ public static class BlockHelper
             var neighbourBlockCoordinates = new Vector3Int(x, y, z) + direction.GetVector();
             var neighbourBlockType = Chunk.GetBlockFromChunkCoordinates(chunk, neighbourBlockCoordinates);
 
-            if (neighbourBlockType == BlockType.Air || neighbourBlockType == BlockType.Nothing && renderNothing &&
+            if (neighbourBlockType == BlockType.Air || neighbourBlockType == BlockType.Nothing && (renderNothing || direction.Equals(Direction.up)) &&
                 (renderDown || !direction.Equals(Direction.down)))
             {
 
@@ -102,24 +106,27 @@ public static class BlockHelper
 
     public static Vector2[] FaceUVs(Direction direction, BlockType blockType)
     {
-        Vector2[] UVs = new Vector2[4];
-        Vector2 tilePos = TexturePosition(direction, blockType);
-        float tilePosX = tilePos.x;
-        float tilePosY = tilePos.y;
+        Vector2 texturePosition = TexturePosition(direction, blockType);
+
+        if (uvCache.TryGetValue(texturePosition, out Vector2[] cachedUVs))
+        {
+            return cachedUVs;
+        }
+
+        float tilePosX = texturePosition.x;
+        float tilePosY = texturePosition.y;
         float tileSizeX = BlockDataManager.tileSizeX;
         float tileSizeY = BlockDataManager.tileSizeY;
 
-        UVs[0] = new Vector2(tileSizeX * tilePosX + tileSizeX,
-            tileSizeY * tilePosY);
+        Vector2[] UVs = new Vector2[]
+        {
+            new(tileSizeX * tilePosX + tileSizeX, tileSizeY * tilePosY),
+            new(tileSizeX * tilePosX + tileSizeX, tileSizeY * tilePosY + tileSizeY),
+            new(tileSizeX * tilePosX, tileSizeY * tilePosY + tileSizeY),
+            new(tileSizeX * tilePosX, tileSizeY * tilePosY)
+        };
 
-        UVs[1] = new Vector2(tileSizeX * tilePosX + tileSizeX,
-            tileSizeY * tilePosY + tileSizeY);
-
-        UVs[2] = new Vector2(tileSizeX * tilePosX,
-            tileSizeY * tilePosY + tileSizeY);
-
-        UVs[3] = new Vector2(tileSizeX * tilePosX,
-            tileSizeY * tilePosY);
+        uvCache.Add(texturePosition, UVs);
 
         return UVs;
     }

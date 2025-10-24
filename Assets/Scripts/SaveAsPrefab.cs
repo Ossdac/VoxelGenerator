@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEditor.VersionControl;
 using UnityEngine;
 
-public class SaveToPrefab : MonoBehaviour
+public class SaveAsPrefab : MonoBehaviour
 {
     [SerializeField] private GameObject[] chunks;
     [SerializeField] private string prefabFolder;
